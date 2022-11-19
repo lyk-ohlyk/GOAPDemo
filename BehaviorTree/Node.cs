@@ -1,5 +1,6 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace BehaviorTree
 {
@@ -13,15 +14,18 @@ namespace BehaviorTree
     public class Node
     {
         protected NodeState state;
+        protected List<Node> NodeChildren = new List<Node>();
 
-        public Node parent;
-        protected List<Node> children = new List<Node>();
+        public Node NodeParent;
 
-        private Dictionary<string, object> _dataContext = new Dictionary<string, object>();
+        public WeakReference Owner { get; private set; }
+
+        Dictionary<string, object> m_DataContext = new Dictionary<string, object>();
 
         public Node()
         {
-            parent = null;
+            NodeParent = null;
+            Owner = null;
         }
         public Node(List<Node> children)
         {
@@ -29,54 +33,35 @@ namespace BehaviorTree
                 _Attach(child);
         }
 
+        public object GetOwner()
+        {
+            if (Owner != null && Owner.IsAlive)
+            {
+                return Owner.Target;
+            }
+            if (NodeParent is null)
+                return null;
+
+            var parentOwner = NodeParent.GetOwner();
+            if (parentOwner != null)
+            {
+                Owner = new WeakReference(parentOwner);
+            }
+            return Owner.Target;
+        }
+
+        public void SetOwner(GameObject gameObject)
+        {
+            Owner = new WeakReference(gameObject);
+        }
+
         private void _Attach(Node node)
         {
-            node.parent = this;
-            children.Add(node);
+            node.NodeParent = this;
+            NodeChildren.Add(node);
         }
 
         public virtual NodeState Evaluate() => NodeState.FAILURE;
-
-        public void SetData(string key, object value)
-        {
-            _dataContext[key] = value;
-        }
-
-        public object GetData(string key)
-        {
-            object value = null;
-            if (_dataContext.TryGetValue(key, out value))
-                return value;
-
-            Node node = parent;
-            while (node != null)
-            {
-                value = node.GetData(key);
-                if (value != null)
-                    return value;
-                node = node.parent;
-            }
-            return null;
-        }
-
-        public bool ClearData(string key)
-        {
-            if (_dataContext.ContainsKey(key))
-            {
-                _dataContext.Remove(key);
-                return true;
-            }
-
-            Node node = parent;
-            while (node != null)
-            {
-                bool cleared = node.ClearData(key);
-                if (cleared)
-                    return true;
-                node = node.parent;
-            }
-            return false;
-        }
     }
 
 }

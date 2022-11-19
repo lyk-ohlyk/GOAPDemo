@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
  
@@ -8,8 +7,10 @@ namespace GOAP
     public enum StateDef
     {
         HAS_GUN,
+        IS_GUN_NEAR,
         HAS_TARGET,
         IS_TARGET_NEAR,
+        TARGET_IN_SIGHT,
         IS_LOW_HP,
     };
 
@@ -63,9 +64,11 @@ namespace GOAP
             m_InitStates = new Dictionary<StateDef, char>()
             {
                 { StateDef.HAS_GUN, '0'},
+                { StateDef.IS_GUN_NEAR, '0'},
                 { StateDef.HAS_TARGET, '0'},
-                { StateDef.IS_LOW_HP, '0'},
                 { StateDef.IS_TARGET_NEAR, '0'},
+                { StateDef.TARGET_IN_SIGHT, '0'},
+                { StateDef.IS_LOW_HP, '0'},
             };
         }
 

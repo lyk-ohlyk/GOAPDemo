@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 
+using GOAP;
+
 namespace Unity.FPS.AI
 {
     [RequireComponent(typeof(Health), typeof(Actor), typeof(NavMeshAgent))]
@@ -83,6 +85,11 @@ namespace Unity.FPS.AI
 
         [Tooltip("Color of the sphere gizmo representing the detection range")]
         public Color DetectionRangeColor = Color.blue;
+
+        [Tooltip("Color of thethe sphere gizmo representing the detection range")]
+        public Color RefelectTestColor = Color.blue;
+
+        public AIWorldStates worldStates;
 
         public UnityAction onAttack;
         public UnityAction onDetectedTarget;

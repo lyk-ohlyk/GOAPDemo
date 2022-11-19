@@ -2,6 +2,8 @@
 using Unity.FPS.Game;
 using UnityEngine;
 
+using GOAP;
+
 namespace Unity.FPS.AI
 {
     public class EnemyManager : MonoBehaviour

@@ -1,23 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace BehaviorTree
 {
     public abstract class Tree : MonoBehaviour
     {
-
-        private Node _root = null;
+        private Node m_Root = null;
 
         protected void Start()
         {
-            _root = SetupTree();
+            m_Root = SetupTree();
+            m_Root.SetOwner(gameObject);
         }
 
         private void Update()
         {
-            if (_root != null)
-                _root.Evaluate();
+            if (m_Root != null)
+                m_Root.Evaluate();
         }
 
         protected abstract Node SetupTree();

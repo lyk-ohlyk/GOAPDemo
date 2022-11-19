@@ -1,26 +1,24 @@
-using System.Collections;
-using System.Collections.Generic;
 
-using GOAP;
-
-public class Goal
+namespace GOAP
 {
-    public StateCondition TargetStates { get; private set; }
-    public StateCondition PreCondition { get; private set; }
-
-    public void SetTargetState(StateCondition state)
+    public class AIGoal
     {
-        TargetStates = state;
-    }
+        public StateCondition TargetStates { get; private set; }
+        public StateCondition PreCondition { get; private set; }
 
-    public void SetPreCondition (StateCondition condition)
-    {
-        PreCondition = condition;
-    }
+        public void SetTargetState(StateCondition state)
+        {
+            TargetStates = state;
+        }
 
-    public int GetUnmetStatesCount(AIWorldStates worldStates)
-    {
-        return worldStates.GetUnmetCount(TargetStates);
+        public void SetPreCondition(StateCondition condition)
+        {
+            PreCondition = condition;
+        }
+
+        public int GetUnmetStatesCount(AIWorldStates worldStates)
+        {
+            return worldStates.GetUnmetCount(TargetStates);
+        }
     }
 }
-
