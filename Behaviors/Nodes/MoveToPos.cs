@@ -7,16 +7,20 @@ using GOAP;
 
 public class NodeMoveTo : Node
 {
-    Blackboard blackboard;
+    public float MinDist;
 
-    public NodeMoveTo()
+    public NodeMoveTo(float dist=0f)
     {
-        GameObject owner = GetOwner() as GameObject;
-        blackboard = owner.GetComponent("Blackboard") as Blackboard;
+        MinDist = dist;
     }
 
     public override NodeState Evaluate()
     {
+        if (!CheckBlackboard())
+        {
+            return NodeState.FAILURE;
+        }
+
         GameObject owner = GetOwner() as GameObject;
         if (owner == null)
         {
@@ -25,15 +29,24 @@ public class NodeMoveTo : Node
 
         double distance = blackboard.GetBlackboardValue<double>(BlackboardKeys.BBTargetDist.Str);
         GameObject target = blackboard.GetTarget();
-
-        if (distance > 0.01f)
+        if (target == null)
         {
+            return NodeState.FAILURE;
+        }
+
+        if (distance > MinDist)
+        {
+            float speedCoefficient = Mathf.Min((float)(distance - MinDist), 1f);
             owner.transform.position = Vector3.MoveTowards(
                 owner.transform.position, 
                 target.transform.position,
-                MoveToTarget.speed * Time.deltaTime);
+                speedCoefficient * MoveToTarget.speed * Time.deltaTime);
 
             owner.transform.LookAt(target.transform.position);
+        }
+        else
+        {
+            return NodeState.SUCCESS;
         }
 
         state = NodeState.RUNNING;

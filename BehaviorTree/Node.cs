@@ -16,9 +16,11 @@ namespace BehaviorTree
         protected NodeState state;
         protected List<Node> NodeChildren = new List<Node>();
 
+        protected AIBlackboard blackboard;
+
         public Node NodeParent;
 
-        public WeakReference Owner { get; private set; }
+        private WeakReference Owner;
 
         Dictionary<string, object> m_DataContext = new Dictionary<string, object>();
 
@@ -59,6 +61,21 @@ namespace BehaviorTree
         {
             node.NodeParent = this;
             NodeChildren.Add(node);
+        }
+
+        public bool CheckBlackboard()
+        {
+            GameObject owner = GetOwner() as GameObject;
+            if (owner == null)
+            {
+                return false;
+            }
+
+            if (blackboard == null)
+            {
+                blackboard = owner.GetComponent<AIBlackboard>();
+            }
+            return !(blackboard == null);
         }
 
         public virtual NodeState Evaluate() => NodeState.FAILURE;

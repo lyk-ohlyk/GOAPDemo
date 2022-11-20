@@ -5,9 +5,14 @@ using UnityEngine;
 
 using GOAP;
 
-public class Blackboard : MonoBehaviour
+public class AIBlackboard : MonoBehaviour
 {
     Dictionary<string, object> m_BlackboardDict;
+
+
+    [Tooltip("BlackboardValue")]
+    [TextArea(5, 10)]
+    public string BlackboardString;
 
     WeakReference m_TargetRef;
 
@@ -18,7 +23,6 @@ public class Blackboard : MonoBehaviour
 
         // lyk dev TODO: load from config file.
         SetBlackboardValue(BlackboardKeys.BBTargetDist.Str, 100.0);
-        SetBlackboardValue(BlackboardKeys.BBHealth.Str, 100.0);
         SetBlackboardValue(BlackboardKeys.BBTargetName.Str, "");
     }
 
@@ -27,6 +31,19 @@ public class Blackboard : MonoBehaviour
         BlackboardParam<T> param = new BlackboardParam<T>();
         param.SetValue(value);
         m_BlackboardDict[name] = param;
+
+        GetBlackboardString();
+    }
+
+    public string GetBlackboardString()
+    {
+        BlackboardString = "";
+        foreach (var valuePair in m_BlackboardDict)
+        {
+            BlackboardString += "" + valuePair.Key + ":" + valuePair.Value.ToString() + ";\n";
+        }
+
+        return BlackboardString;
     }
 
     public GameObject GetTarget()
@@ -64,6 +81,6 @@ public class Blackboard : MonoBehaviour
 
         // Update the blackboard values with the target.
         double dist = Vector3.Distance(transform.position, target.transform.position);
-        SetBlackboardValue<double>(BlackboardKeys.BBTargetDist.Str, dist);
+        SetBlackboardValue(BlackboardKeys.BBTargetDist.Str, dist);
     }
 }

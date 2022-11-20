@@ -2,17 +2,11 @@
 
 namespace BehaviorTree
 {
-    public class MoveToTarget : AIBehaviorTree
+    public class Patrol : AIBehaviorTree
     {
-        public static float speed = 2f;
-        public static float fovRange = 6f;
-        public static float attackRange = 1f;
-
-        public float DistanceToStop = 5f;
-
         protected override void SetTreeName()
         {
-            TreeName = "MoveToTarget";
+            TreeName = "Patrol";
         }
 
         protected override Node SetupTree()
@@ -21,7 +15,7 @@ namespace BehaviorTree
             {
                 new Sequence(new List<Node>
                 {
-                    new NodeMoveTo(DistanceToStop),
+                    new GetPatrolPoint(),
                 }),
             });
 

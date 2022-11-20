@@ -32,10 +32,11 @@ namespace Unity.FPS.AI
         EnemyController m_EnemyController;
         AudioSource m_AudioSource;
 
-        const string k_AnimMoveSpeedParameter = "MoveSpeed";
-        const string k_AnimAttackParameter = "Attack";
-        const string k_AnimAlertedParameter = "Alerted";
-        const string k_AnimOnDamagedParameter = "OnDamaged";
+        public const string k_AnimMoveSpeedParameter = "MoveSpeed";
+        public const string k_AnimAttackParameter = "Attack";
+        public const string k_AnimAlertedParameter = "Alerted";
+        public const string k_AnimOnDamagedParameter = "OnDamaged";
+        public const string k_AnimIsFrightened = "IsFrightened";
 
         void Start()
         {
@@ -61,6 +62,8 @@ namespace Unity.FPS.AI
 
         void Update()
         {
+            return;  // lyk debug TODO: let's use GOAP to control robots!
+
             UpdateAiStateTransitions();
             UpdateCurrentAiState();
 
@@ -179,7 +182,7 @@ namespace Unity.FPS.AI
                 RandomHitSparks[n].Play();
             }
 
-            Animator.SetTrigger(k_AnimOnDamagedParameter);
+            Animator.SetTrigger(k_AnimAttackParameter);
         }
     }
 }

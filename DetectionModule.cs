@@ -2,6 +2,7 @@
 using Unity.FPS.Game;
 using UnityEngine;
 using UnityEngine.Events;
+using GOAP;
 
 namespace Unity.FPS.AI
 {
@@ -36,6 +37,8 @@ namespace Unity.FPS.AI
 
         const string k_AnimAttackParameter = "Attack";
         const string k_AnimOnDamagedParameter = "OnDamaged";
+
+        AIBlackboard blackboard;
 
         protected virtual void Start()
         {
@@ -103,6 +106,22 @@ namespace Unity.FPS.AI
                 KnownDetectedTarget != null)
             {
                 OnDetect();
+
+                if (blackboard == null)
+                {
+                    blackboard = gameObject.GetComponentInParent<AIBlackboard>();
+                }
+
+                if (blackboard != null)
+                {
+                    blackboard.SetBlackboardValue(BlackboardKeys.BBTargetName.Str, KnownDetectedTarget.name);
+                }
+                else
+                {
+                    Debug.Log("lyk debug: blackboard is null!!!!!!!" + gameObject.name);
+                }
+
+                Debug.Log("Target name: " + KnownDetectedTarget.name);
             }
 
             if (HadKnownTarget &&
@@ -126,7 +145,7 @@ namespace Unity.FPS.AI
 
             if (Animator)
             {
-                Animator.SetTrigger(k_AnimOnDamagedParameter);
+                // Animator.SetTrigger(k_AnimOnDamagedParameter);
             }
         }
 

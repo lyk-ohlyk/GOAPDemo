@@ -1,24 +1,36 @@
+using System;
 using UnityEngine;
 
 namespace BehaviorTree
 {
-    public abstract class Tree : MonoBehaviour
+    public abstract class AIBehaviorTree
     {
+        public string TreeName;
+
         private Node m_Root = null;
 
-        protected void Start()
+
+        public void TreeInit(GameObject owner)
         {
             m_Root = SetupTree();
-            m_Root.SetOwner(gameObject);
+            m_Root.SetOwner(owner);
+            SetTreeName();
         }
 
-        private void Update()
+        protected virtual void SetTreeName()
         {
-            if (m_Root != null)
-                m_Root.Evaluate();
+            TreeName = "";
         }
 
         protected abstract Node SetupTree();
+
+        public NodeState BehaviorTreeTick()
+        {
+            if (m_Root != null)
+                return m_Root.Evaluate();
+
+            return NodeState.FAILURE;
+        }
 
     }
 

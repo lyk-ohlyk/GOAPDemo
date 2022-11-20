@@ -127,6 +127,7 @@ namespace Unity.FPS.AI
 
         void Start()
         {
+
             m_EnemyManager = FindObjectOfType<EnemyManager>();
             DebugUtility.HandleErrorIfNullFindObject<EnemyManager, EnemyController>(m_EnemyManager, this);
 

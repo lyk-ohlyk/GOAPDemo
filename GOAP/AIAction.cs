@@ -22,12 +22,12 @@ namespace GOAP
             m_Cost = new AICost(paramType, costParamName, curveType, coefficient);
         }
 
-        public double CalcCost(Blackboard blackboard)
+        public double CalcCost(AIBlackboard blackboard)
         {
             return m_Cost.Evaluate(GetParamValue(blackboard));
         }
 
-        private double GetParamValue(Blackboard blackboard)
+        private double GetParamValue(AIBlackboard blackboard)
         {
             // lyk dev TODO: Read m_CostParamName from AI blackboard and world states.
             if (m_Cost.CostType == CostParamType.Blackboard)
