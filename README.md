@@ -3,8 +3,8 @@
 ## Soldier Behaviors.
 ### Goal: 
 	Self-protection, 
-		Current State: IS_LOW_HP - 1
-		Target State: IS_LOW_HP - 0
+		Current State: IS_TARGET_NEAR - 1
+		Target State: IS_TARGET_NEAR - 0
 	Kill target, 
 		Current State: HAS_TARGET – 1, IS_TARGET_IN_RANGE – 1
 		Target State: HAS_TARGET - 0
