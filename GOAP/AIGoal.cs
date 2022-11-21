@@ -1,8 +1,10 @@
+using UnityEngine;
 
 namespace GOAP
 {
     public class AIGoal
     {
+        public string name;
         public StateCondition TargetStates { get; private set; }
         public StateCondition PreCondition { get; private set; }
 

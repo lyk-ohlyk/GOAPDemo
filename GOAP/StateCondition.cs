@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace GOAP
 {
@@ -11,11 +13,20 @@ namespace GOAP
             StateDict = new Dictionary<StateDef, bool>();
         }
 
-        void SetState(List<WorldState> statesList)
+        public void SetState(string stateName, bool value)
         {
-            foreach(var state in statesList)
+            StateDef state;
+            if (Enum.TryParse<StateDef>(stateName, out state))
             {
-                StateDict[state.WSState] = state.WSValue;
+                StateDict[state] = value;
+            }
+        }
+
+        public void DebugPrint()
+        {
+            foreach (var state in StateDict)
+            {
+                Debug.Log("StateCondition:" + state.Key + ", " + state.Value);
             }
         }
     }

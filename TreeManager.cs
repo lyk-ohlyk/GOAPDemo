@@ -6,14 +6,15 @@ using BehaviorTree;
 public class TreeManager : MonoBehaviour
 // The behaviour tree runner which manages all trees' execution.
 {
+    [SerializeField]
+    private string CurrentTreeName;
+
+    public int CurrentTreeIndex;
+
     [Tooltip("The behaviour trees that this GameObject has.")]
     public List<string> BehaviourTreeNames;
 
     public List<AIBehaviorTree> m_BehaviorTrees;
-    public int CurrentTreeIndex { get; private set; }
-
-    [SerializeField]
-    private string CurrentTreeName;
 
     private float m_ActionTickTime = 0.1f;
     private float m_TickTimer = 0f;
@@ -23,7 +24,7 @@ public class TreeManager : MonoBehaviour
     {
         m_BehaviorTrees = new List<AIBehaviorTree>();
         BehaviourTreeNames = new List<string>();
-        CurrentTreeIndex = 3;  // lyk dev TODO: choose different tree.
+        CurrentTreeIndex = 1;  // lyk dev TODO: choose different tree.
 
         LoadBehaviorTrees();
 

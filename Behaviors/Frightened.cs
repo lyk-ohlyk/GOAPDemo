@@ -16,7 +16,7 @@ namespace BehaviorTree
             {
                 new Sequence(new List<Node>
                 {
-                    new Fire(),
+                    new PlayFrightenedAction(),
                 }),
             });
 

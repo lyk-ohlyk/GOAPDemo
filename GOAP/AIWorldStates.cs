@@ -6,12 +6,10 @@ namespace GOAP
 {
     public enum StateDef
     {
-        HAS_GUN,
-        IS_GUN_NEAR,
         HAS_TARGET,
         IS_TARGET_NEAR,
+        IS_TARGET_IN_RANGE,
         TARGET_IN_SIGHT,
-        IS_LOW_HP,
     };
 
     public class WorldState
@@ -42,40 +40,46 @@ namespace GOAP
 
         public AIWorldStates()
         {
-            ConstructStates();
+            m_InitStates = new Dictionary<StateDef, char>();
+            StateCount = Enum.GetNames(typeof(StateDef)).Length;
+            WStates = new char[StateCount];
         }
 
-        void ConstructStates()
+        public void ConstructStates()
         {
-            LoadFromConfig();
-
-            StateCount = Enum.GetNames(typeof(StateDef)).Length;
-
-            WStates = new char[StateCount];
             foreach (var state in m_InitStates)
             {
                 WStates[((int)state.Key)] = state.Value;
             }
         }
 
-        void LoadFromConfig()
+        public void AddState(string stateName, char value)
         {
-            // lyk dev TODO: read config file.
-            m_InitStates = new Dictionary<StateDef, char>()
+            StateDef state;
+            if (Enum.TryParse<StateDef>(stateName, out state))
             {
-                { StateDef.HAS_GUN, '0'},
-                { StateDef.IS_GUN_NEAR, '0'},
-                { StateDef.HAS_TARGET, '0'},
-                { StateDef.IS_TARGET_NEAR, '0'},
-                { StateDef.TARGET_IN_SIGHT, '0'},
-                { StateDef.IS_LOW_HP, '0'},
-            };
+                m_InitStates[state] = value;
+            }
+            ConstructStates();
         }
 
         public string GetStatesString()
         {  
             // string is good for serialization and hashing.
             return new string(WStates);
+        }
+
+        public List<string> GetDebugList()
+        {
+            List<string> debugList = new List<string>();
+
+            int len = Enum.GetNames(typeof(StateDef)).Length;
+            for (int i = 0; i < len; ++i)
+            {
+                debugList.Add("" + (StateDef)i + ": " + WStates[i]);
+            }
+
+            return debugList;
         }
 
         public string GetStates()

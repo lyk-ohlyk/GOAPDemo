@@ -5,16 +5,18 @@ namespace GOAP
 { 
     public class AIAction
     {
+        public string name;
         public string BehaviorName;
+        public double ShowCost;
 
         StateCondition m_Precondition;
         StateCondition m_Effect;
 
         AICost m_Cost;
 
-        public AIAction(double constCost)
+        public AIAction()
         {
-            m_Cost = new AICost(constCost);
+            m_Cost = new AICost();
         }
 
         public AIAction(CostParamType paramType, string costParamName, CurveType curveType, double coefficient)
@@ -24,7 +26,8 @@ namespace GOAP
 
         public double CalcCost(AIBlackboard blackboard)
         {
-            return m_Cost.Evaluate(GetParamValue(blackboard));
+            ShowCost = m_Cost.Evaluate(GetParamValue(blackboard));
+            return ShowCost;
         }
 
         private double GetParamValue(AIBlackboard blackboard)
@@ -69,6 +72,16 @@ namespace GOAP
             }
 
             return statesAfterEffect;
+        }
+
+        public void SetPrecondition(StateCondition stateCondition)
+        {
+            m_Precondition = stateCondition;
+        }
+
+        public void SetEffect(StateCondition stateCondition)
+        {
+            m_Effect = stateCondition;
         }
     }
 

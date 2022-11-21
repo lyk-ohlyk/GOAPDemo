@@ -9,6 +9,8 @@ namespace BehaviorTree
 
         private Node m_Root = null;
 
+        private bool m_NeedExit = false;
+
 
         public void TreeInit(GameObject owner)
         {
@@ -26,6 +28,11 @@ namespace BehaviorTree
 
         public NodeState BehaviorTreeTick()
         {
+            if (m_NeedExit)
+            {
+                return NodeState.FAILURE;
+            }
+
             if (m_Root != null)
                 return m_Root.Evaluate();
 
