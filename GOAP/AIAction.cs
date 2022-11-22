@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System;
 
 
 namespace GOAP
@@ -7,10 +7,10 @@ namespace GOAP
     {
         public string name;
         public string BehaviorName;
-        public double ShowCost;
+        public float ShowCost;
 
         StateCondition m_Precondition;
-        StateCondition m_Effect;
+        public StateCondition ActionEffect { get; private set; }
 
         AICost m_Cost;
 
@@ -19,35 +19,45 @@ namespace GOAP
             m_Cost = new AICost();
         }
 
-        public AIAction(CostParamType paramType, string costParamName, CurveType curveType, double coefficient)
+        public AIAction(CostType paramType, string costParamName, CurveType curveType, float coefficient)
         {
             m_Cost = new AICost(paramType, costParamName, curveType, coefficient);
         }
 
-        public double CalcCost(AIBlackboard blackboard)
+        public float CalcCost(AIBlackboard blackboard)
         {
             ShowCost = m_Cost.Evaluate(GetParamValue(blackboard));
             return ShowCost;
         }
 
-        private double GetParamValue(AIBlackboard blackboard)
+        public void SetCostFunc(Func<float> costFuncInfo)
+        {
+            m_Cost.SetCostFunc(costFuncInfo);
+        }
+
+        private float GetParamValue(AIBlackboard blackboard)
         {
             // lyk dev TODO: Read m_CostParamName from AI blackboard and world states.
-            if (m_Cost.CostType == CostParamType.Blackboard)
+            if (m_Cost.CostType == CostType.Blackboard)
             {
-                return blackboard.GetBlackboardValue<double>(m_Cost.CostParamName);
+                return blackboard.GetBlackboardValue<float>(m_Cost.CostParamName);
             }
-            else if (m_Cost.CostType == CostParamType.WorldState)
+            else if (m_Cost.CostType == CostType.WorldState)
             {
-                return 1.0;
+                return 1.0f;  // lyk dev TODO
             }
 
-            return 0.0;
+            return 0.0f;
         }
 
         public bool IsPreconditionMet(AIWorldStates worldStates)
         {
             return worldStates.IsConditionMet(m_Precondition);
+        }
+
+        public bool IsEffectMet(AIWorldStates worldStates)
+        {
+            return worldStates.IsConditionMet(ActionEffect);
         }
 
         public bool TryPlayAction(AIWorldStates worldStates)
@@ -66,7 +76,7 @@ namespace GOAP
             AIWorldStates statesAfterEffect = new AIWorldStates();
             statesAfterEffect.CopyFromWorldStates(worldStates);
 
-            foreach (var state in m_Effect.StateDict)
+            foreach (var state in ActionEffect.StateDict)
             {
                 statesAfterEffect.SetState(state.Key, state.Value);
             }
@@ -81,7 +91,7 @@ namespace GOAP
 
         public void SetEffect(StateCondition stateCondition)
         {
-            m_Effect = stateCondition;
+            ActionEffect = stateCondition;
         }
     }
 

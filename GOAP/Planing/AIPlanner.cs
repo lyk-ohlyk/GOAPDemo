@@ -1,6 +1,7 @@
-using System.Text;
+using System;
 using System.Xml;
 using System.Xml.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,18 +15,54 @@ namespace GOAP
         public List<string> ActionsShowList;
 
         List<AIGoal> m_Goals;
-
         List<AIAction> m_Actions;
+
+        CostFuncs m_CostFuncs;
 
         AIWorldStates m_CurStates;
         AIWorldStates m_TargetStates;
 
+        AIBlackboard blackboard;
+
         float m_LastUpdateTime = 0f;
         float m_StringUpdateTick = 0.2f;
 
+        private void Start()
+        {
+            blackboard = gameObject.GetComponent<AIBlackboard>();
+            m_CostFuncs = new CostFuncs();
+            m_CostFuncs.SetCostOwner(gameObject);
+            LoadConfig();
+        }
+
+        private void Update()
+        {
+            if (Time.time - m_LastUpdateTime > m_StringUpdateTick)
+            {
+                m_LastUpdateTime = Time.time;
+                UpdateShowStrings();
+            }
+        }
+
+        static IEnumerable<XElement> SimpleStreamAxis(string inputUrl)
+        {
+            using (XmlReader reader = XmlReader.Create(inputUrl))
+            {
+                reader.MoveToContent();
+                while (reader.Read())
+                {
+                    if (reader.NodeType != XmlNodeType.Element)
+                        continue;
+                    XElement el = XNode.ReadFrom(reader) as XElement;
+                    if (el == null) continue;
+                    yield return el;
+                }
+            }
+        }
+
         public void LoadConfig(string configName="BluffingEnemy")
         {
-            string url = "Assets/FPS/Scripts/AI/GOAP/AIConfig/BluffingEnemy.xml";
+            string url = "Assets/FPS/Scripts/AI/GOAP/AIConfig/" + configName + ".xml";
             var xElement = SimpleStreamAxis(url);
             
             foreach (var e in xElement)
@@ -112,6 +149,10 @@ namespace GOAP
                         StateCondition stateCondition = ParseStates(attr);
                         action.SetEffect(stateCondition);
                     }
+                    else if (attr.Name == "CostFunc")
+                    {
+                        action.SetCostFunc(GetCostFuncFromString(attr.Value));
+                    }
                 }
 
                 m_Actions.Add(action);
@@ -129,36 +170,25 @@ namespace GOAP
             return stateCondition;
         }
 
-        static IEnumerable<XElement> SimpleStreamAxis(string inputUrl)
+        public void SetCurrentWorldState(StateDef stateName, bool value)
         {
-            using (XmlReader reader = XmlReader.Create(inputUrl))
-            {
-                reader.MoveToContent();
-                while (reader.Read())
-                {
-                    if (reader.NodeType != XmlNodeType.Element)
-                        continue;
-                    XElement el = XNode.ReadFrom(reader) as XElement;
-                    if (el == null) continue;
-                    yield return el;
-                }
-            }
-        }
-        private void Start()
-        {
-            LoadConfig();
+            m_CurStates.SetState(stateName, value);
         }
 
-        private void Update()
+        private Func<float> GetCostFuncFromString(string costFuncInfo)
         {
-            if (Time.time - m_LastUpdateTime > m_StringUpdateTick)
+            if (costFuncInfo.IndexOf('|') != -1)  // Constant value
             {
-                m_LastUpdateTime = Time.time;
-                UpdateShowStrings();
+                string[] info = costFuncInfo.Split('|');
+                float value = float.Parse(info[1]);
+                return m_CostFuncs.ConstCostFunc(value);
             }
+
+            var func = m_CostFuncs.GetType().GetMethod(costFuncInfo);
+            return () => (float)func.Invoke(m_CostFuncs, null);
         }
 
-        void UpdateShowStrings()
+        private void UpdateShowStrings()
         {
             WorldStatesShowList = m_CurStates.GetDebugList();
 
@@ -171,9 +201,135 @@ namespace GOAP
             ActionsShowList = new List<string>();
             foreach (var action in m_Actions)
             {
-                ActionsShowList.Add("Behavior:" + action.BehaviorName + ", Cost:" + action.ShowCost);
+                ActionsShowList.Add("Behavior:" + action.BehaviorName + ", Cost:" + action.CalcCost(blackboard));
             }
-            // ActionsShowList = ;
+
+        }
+
+        /// Run A* to get a valid plan.
+        ///     Current vertex: m_CurStates; 
+        ///     Target vertex:  m_TargetStates
+        ///     Edges: AIActions that fit the current WorldStates. Each edge lead to a vertex based on AIAction.m_Effect
+        ///     Edge weights: Cost of actions.
+        private AIAction PlanAction()
+        {
+            string startPoint = m_CurStates.GetStatesString();
+            string curPoint = m_CurStates.GetStatesString();
+            string targetPoint = m_TargetStates.GetStatesString();
+
+            PriorityQueue<string> priorityQueue = new PriorityQueue<string>();
+
+            // Record state cost, or vertex distance.
+            Dictionary<string, float> stateCostsDict = new Dictionary<string, float>();
+            stateCostsDict[curPoint] = 0f;
+
+            // Record previous vertex for backtracking, to find the first action.
+            Dictionary<string, Tuple<string, AIAction>> preState = new Dictionary<string, Tuple<string, AIAction>>();
+
+            // Init visited set.
+            HashSet<string> visited = new HashSet<string>();
+
+            // Init Min Heap
+            priorityQueue.Enqueue(curPoint, 0f);
+            while (priorityQueue.Count > 0)
+            {
+                curPoint = priorityQueue.Dequeue();
+                visited.Add(curPoint);
+
+                // Found target.
+                if (curPoint == targetPoint)
+                {
+                    break;
+                }
+
+                AIWorldStates curStates = new AIWorldStates(curPoint);
+                List<AIAction> edges = GetAIActions(curStates);
+
+                foreach (var edge in edges)
+                {
+                    float totalCost = stateCostsDict[curPoint];
+                    totalCost += edge.CalcCost(blackboard);
+                    string nextPoint = curStates.GetStateAfterEffect(edge.ActionEffect);
+
+                    if (visited.Contains(nextPoint))
+                        continue;
+
+                    // Heuristic
+                    AIWorldStates nextState = new AIWorldStates(nextPoint);
+                    totalCost += CalcDistBetweenStates(m_TargetStates, nextState);
+
+                    // Update cost
+                    if (!stateCostsDict.ContainsKey(nextPoint))
+                    {
+                        stateCostsDict[nextPoint] = totalCost;
+                        preState[nextPoint] = new Tuple<string, AIAction>(curPoint, edge);
+
+                        priorityQueue.Enqueue(nextPoint, totalCost);
+                    }
+                    else if (stateCostsDict[nextPoint] > totalCost)
+                    {
+                        priorityQueue.UpdatePriority(nextPoint, totalCost);
+                    }
+                }
+            }
+
+            if (!visited.Contains(targetPoint))
+            {
+                return null; // No Action can be found.
+            }
+
+            // Backtracking to get Action.
+            string backString = targetPoint;
+            AIAction nextAction = null;
+            while (backString != startPoint)
+            {
+                backString = preState[backString].Item1;
+                nextAction = preState[backString].Item2;
+            }
+
+            return nextAction;
+        }
+
+        /// <summary>
+        ///  Find AIActions that fit worldStates.
+        /// </summary>
+        /// <returns> The list of fitted AIActions. </returns>
+        private List<AIAction> GetAIActions(AIWorldStates worldStates)
+        {
+            List<AIAction> fittedActions = new List<AIAction>();
+
+            foreach (AIAction action in m_Actions)
+            {
+                if (!(action.IsPreconditionMet(worldStates)))
+                    continue;
+
+                // Check if action's effect is already fitted.
+                if (action.IsEffectMet(worldStates))
+                    continue;
+
+                fittedActions.Add(action);
+            }
+
+            return fittedActions;
+        }
+
+        private int CalcDistBetweenStates(AIWorldStates a, AIWorldStates b)
+        {
+            char[] statesA = a.WStates;
+            char[] statesB = b.WStates;
+
+            int count = 0;
+            int len = AIWorldStates.StateCount;
+
+            for (int i = 0; i < len; ++i)
+            {
+                if (statesA[i] != statesB[i])
+                {
+                    ++count;
+                }
+            }
+
+            return count;
         }
 
     }

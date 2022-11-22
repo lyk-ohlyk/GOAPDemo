@@ -39,6 +39,7 @@ namespace Unity.FPS.AI
         const string k_AnimOnDamagedParameter = "OnDamaged";
 
         AIBlackboard blackboard;
+        AIPlanner planner;
 
         protected virtual void Start()
         {
@@ -48,6 +49,20 @@ namespace Unity.FPS.AI
 
         public virtual void HandleTargetDetection(Actor actor, Collider[] selfColliders)
         {
+            if (planner == null)
+            {
+                planner = gameObject.GetComponentInParent<AIPlanner>();
+            }
+            if (blackboard == null)
+            {
+                blackboard = gameObject.GetComponentInParent<AIBlackboard>();
+            }
+
+            if (blackboard == null || planner == null)
+            {
+                Debug.Log("lyk debug: object(planner/blackboard) is null!!!!!!!" + gameObject.name);
+            }
+
             // Handle known target detection timeout
             if (KnownDetectedTarget && !IsSeeingTarget && (Time.time - TimeLastSeenTarget) > KnownTargetTimeout)
             {
@@ -97,9 +112,28 @@ namespace Unity.FPS.AI
                 }
             }
 
-            IsTargetInAttackRange = KnownDetectedTarget != null &&
-                                    Vector3.Distance(transform.position, KnownDetectedTarget.transform.position) <=
-                                    AttackRange;
+            if (KnownDetectedTarget != null)
+            {
+
+                blackboard?.SetBlackboardValue(BlackboardKeys.BBTargetName.Str, KnownDetectedTarget.name);
+
+                float dist = Vector3.Distance(transform.position, KnownDetectedTarget.transform.position);
+                IsTargetInAttackRange = KnownDetectedTarget != null && dist <= AttackRange;
+                blackboard?.SetBlackboardValue(BlackboardKeys.BBTargetDist.Str, dist);
+
+                if (IsSeeingTarget)
+                {
+                    planner?.SetCurrentWorldState(StateDef.IS_TARGET_NEAR, dist < 5f);
+                    planner?.SetCurrentWorldState(StateDef.IS_TARGET_IN_RANGE, dist < 20f);
+                }
+                else
+                {
+                    planner?.SetCurrentWorldState(StateDef.IS_TARGET_NEAR, false);
+                    planner?.SetCurrentWorldState(StateDef.IS_TARGET_IN_RANGE, false);
+                }
+
+                planner?.SetCurrentWorldState(StateDef.TARGET_IN_SIGHT, IsSeeingTarget);
+            }
 
             // Detection events
             if (!HadKnownTarget &&
@@ -107,20 +141,7 @@ namespace Unity.FPS.AI
             {
                 OnDetect();
 
-                if (blackboard == null)
-                {
-                    blackboard = gameObject.GetComponentInParent<AIBlackboard>();
-                }
-
-                if (blackboard != null)
-                {
-                    blackboard.SetBlackboardValue(BlackboardKeys.BBTargetName.Str, KnownDetectedTarget.name);
-                }
-                else
-                {
-                    Debug.Log("lyk debug: blackboard is null!!!!!!!" + gameObject.name);
-                }
-
+                planner?.SetCurrentWorldState(StateDef.HAS_TARGET, true);
                 Debug.Log("Target name: " + KnownDetectedTarget.name);
             }
 
@@ -128,6 +149,9 @@ namespace Unity.FPS.AI
                 KnownDetectedTarget == null)
             {
                 OnLostTarget();
+
+                blackboard?.SetBlackboardValue(BlackboardKeys.BBTargetName.Str, "");
+                planner?.SetCurrentWorldState(StateDef.HAS_TARGET, false);
             }
 
             // Remember if we already knew a target (for next frame)
@@ -145,7 +169,7 @@ namespace Unity.FPS.AI
 
             if (Animator)
             {
-                // Animator.SetTrigger(k_AnimOnDamagedParameter);
+                Animator.SetTrigger(k_AnimOnDamagedParameter);
             }
         }
 

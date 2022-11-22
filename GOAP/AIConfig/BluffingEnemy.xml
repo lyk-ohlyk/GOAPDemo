@@ -66,7 +66,7 @@
                 <Effect>IS_TARGET_IN_RANGE|1</Effect>
                 <Effect>TARGET_IN_SIGHT|1</Effect>
             </Effects>
-            <Cost>ConstFunc|1</Cost>
+            <CostFunc>ConstFunc|1</CostFunc>
         </Action>
         <Action>
             <Name>Frightened</Name>
@@ -77,7 +77,7 @@
             <Effects>
                 <Effect>HAS_TARGET|0</Effect>
             </Effects>
-            <Cost>FrightDistCost</Cost>
+            <CostFunc>FrightDistCost</CostFunc>
         </Action>
         <Action>
             <Name>Attack</Name>
@@ -89,7 +89,7 @@
             <Effects>
                 <Effect>HAS_TARGET|0</Effect>
             </Effects>
-            <Cost>ConstFunc|1</Cost>
+            <CostFunc>ConstFunc|1</CostFunc>
         </Action>
         <Action>
             <Name>Patrol</Name>
@@ -100,7 +100,7 @@
             <Effects>
                 <Effect>HAS_TARGET|1</Effect>
             </Effects>
-            <Cost>ConstFunc|1</Cost>
+            <CostFunc>ConstFunc|1</CostFunc>
         </Action>
         <!--Action>
             <Name>Jump</Name>
@@ -111,7 +111,7 @@
             <Effects>
                 <Effect>HAS_TARGET|0</Effect>
             </Effects>
-            <Cost>JumpCost</Cost>
+            <CostFunc>JumpCost</CostFunc>
         </Action-->
     </Actions>
 </Root>

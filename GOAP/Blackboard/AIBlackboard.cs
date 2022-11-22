@@ -32,7 +32,7 @@ public class AIBlackboard : MonoBehaviour
         param.SetValue(value);
         m_BlackboardDict[name] = param;
 
-        GetBlackboardString();
+        GetBlackboardString();  // for serialization etc.
     }
 
     public string GetBlackboardString()
@@ -73,14 +73,4 @@ public class AIBlackboard : MonoBehaviour
         return param.GetValue();
     }
 
-    void Update()
-    {
-        GameObject target = GetTarget();
-        if (target == null)
-            return;
-
-        // Update the blackboard values with the target.
-        double dist = Vector3.Distance(transform.position, target.transform.position);
-        SetBlackboardValue(BlackboardKeys.BBTargetDist.Str, dist);
-    }
 }

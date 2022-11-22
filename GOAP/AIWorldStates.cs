@@ -36,6 +36,8 @@ namespace GOAP
         public char[] WStates { get; private set; }  // All world states has the same length of states - length of StateDef.
         public static int StateCount;
 
+        private char[] TempStates;  // Used for copy WStates.
+
         Dictionary<StateDef, char> m_InitStates;
 
         public AIWorldStates()
@@ -43,6 +45,20 @@ namespace GOAP
             m_InitStates = new Dictionary<StateDef, char>();
             StateCount = Enum.GetNames(typeof(StateDef)).Length;
             WStates = new char[StateCount];
+            TempStates = new char[StateCount];
+        }
+
+        public AIWorldStates(string stateString)
+        {
+            m_InitStates = new Dictionary<StateDef, char>();
+            StateCount = Enum.GetNames(typeof(StateDef)).Length;
+            WStates = new char[StateCount];
+            TempStates = new char[StateCount];
+
+            for (int i = 0; i < StateCount; ++i)
+            {
+                WStates[i] = stateString[i];
+            }
         }
 
         public void ConstructStates()
@@ -67,6 +83,23 @@ namespace GOAP
         {  
             // string is good for serialization and hashing.
             return new string(WStates);
+        }
+
+        public string GetStateAfterEffect(StateCondition effect)
+        {
+            // Copy states from current states.
+            for (int i = 0; i < StateCount; ++i)
+            {
+                TempStates[i] = WStates[i];
+            }
+
+            foreach (var state in effect.StateDict)
+            {
+                char stateValue = state.Value ? '1' : '0';
+                TempStates[((int)state.Key)] = stateValue;
+            }
+
+            return new string(TempStates);
         }
 
         public List<string> GetDebugList()

@@ -12,17 +12,17 @@ namespace GOAP
 
     public abstract class BaseCurve
     {
-        protected double m_MinValue;
-        protected double m_MaxValue;
-        protected double m_MinX;
-        protected double m_MaxX;
+        protected float m_MinValue;
+        protected float m_MaxValue;
+        protected float m_MinX;
+        protected float m_MaxX;
 
         protected BaseCurve()
         {
             SetCurveEnds();
         }
 
-        public void SetCurveEnds(double minValue = 0.0, double maxValue = 1.0, double minX = 0.0, double maxX = 1.0)
+        public void SetCurveEnds(float minValue=0.0f, float maxValue=1.0f, float minX=0.0f, float maxX=1.0f)
         {
             Debug.Assert(minValue < maxValue);
             Debug.Assert(minX < maxX);
@@ -33,7 +33,7 @@ namespace GOAP
             m_MaxX = maxX;
         }
 
-        public abstract double GetPointValue(double point);
+        public abstract float GetPointValue(float point);
 
         // lyk dev TODO: editable point insearting.
     }
@@ -46,7 +46,7 @@ namespace GOAP
 
         }
 
-        public override double GetPointValue(double x)
+        public override float GetPointValue(float x)
         {
             if (x < m_MinX)
                 return m_MinValue;
@@ -66,7 +66,7 @@ namespace GOAP
 
         }
 
-        public override double GetPointValue(double x)
+        public override float GetPointValue(float x)
         {
             if (x < m_MinX)
                 return m_MinValue;
@@ -74,7 +74,7 @@ namespace GOAP
                 return m_MaxValue;
             else
             {
-                return m_MinValue + Math.Pow((x - m_MinX) / (m_MaxX - m_MinX), 2) * (m_MaxValue - m_MinValue);
+                return m_MinValue + (float)Math.Pow((x - m_MinX) / (m_MaxX - m_MinX), 2) * (m_MaxValue - m_MinValue);
             }
         }
     }
@@ -86,7 +86,7 @@ namespace GOAP
 
         }
 
-        public override double GetPointValue(double x)
+        public override float GetPointValue(float x)
         {
             if (x < m_MinX)
                 return m_MinValue;
@@ -94,7 +94,7 @@ namespace GOAP
                 return m_MaxValue;
             else
             {
-                return m_MinValue + Math.Pow((x - m_MinX) / (m_MaxX - m_MinX), 3) * (m_MaxValue - m_MinValue);
+                return m_MinValue + (float)Math.Pow((x - m_MinX) / (m_MaxX - m_MinX), 3) * (m_MaxValue - m_MinValue);
             }
         }
     }

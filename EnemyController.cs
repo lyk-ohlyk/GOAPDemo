@@ -162,6 +162,7 @@ namespace Unity.FPS.AI
                 gameObject);
             DebugUtility.HandleWarningIfDuplicateObjects<DetectionModule, EnemyController>(detectionModules.Length,
                 this, gameObject);
+
             // Initialize detection module
             DetectionModule = detectionModules[0];
             DetectionModule.onDetectedTarget += OnDetectedTarget;
@@ -211,6 +212,10 @@ namespace Unity.FPS.AI
         void Update()
         {
             EnsureIsWithinLevelBounds();
+
+            Debug.Log(m_SelfColliders);
+
+            Debug.Log(m_Actor == null);
 
             DetectionModule.HandleTargetDetection(m_Actor, m_SelfColliders);
 
