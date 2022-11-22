@@ -6,7 +6,7 @@
 		Current State: IS_TARGET_NEAR - 1
 		Target State: IS_TARGET_NEAR - 0
 	Kill target, 
-		Current State: HAS_TARGET – 1, IS_TARGET_IN_RANGE – 1
+		Current State: HAS_TARGET - 1, TARGET_IN_SIGHT – 1, IS_TARGET_IN_RANGE – 1
 		Target State: HAS_TARGET - 0
 	Get near to target, 
 		Current State: HAS_TARGET – 1, IS_TARGET_IN_RANGE – 0

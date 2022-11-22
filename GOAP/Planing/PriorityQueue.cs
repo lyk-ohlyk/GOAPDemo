@@ -28,7 +28,7 @@ namespace GOAP
             m_IsMinPriorityQueue = isMinPriorityQueue;
         }
 
-        public void Enqueue(float priority, T obj)
+        public void Enqueue(T obj, float priority)
         {
             Node node = new Node() { Priority = priority, Object = obj };
             queue.Add(node);
