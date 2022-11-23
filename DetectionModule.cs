@@ -12,7 +12,7 @@ namespace Unity.FPS.AI
         public Transform DetectionSourcePoint;
 
         [Tooltip("The max distance at which the enemy can see targets")]
-        public float DetectionRange = 20f;
+        public float DetectionRange = 15f;
 
         [Tooltip("The max distance at which the enemy can attack its target")]
         public float AttackRange = 10f;
@@ -60,7 +60,7 @@ namespace Unity.FPS.AI
 
             if (blackboard == null || planner == null)
             {
-                Debug.Log("lyk debug: object(planner/blackboard) is null!!!!!!!" + gameObject.name);
+                Debug.Log("lyk debug: object(planner/blackboard) is null!!!" + gameObject.name);
             }
 
             // Handle known target detection timeout
@@ -115,6 +115,8 @@ namespace Unity.FPS.AI
             if (KnownDetectedTarget != null)
             {
 
+                Debug.Log("Position:" + KnownDetectedTarget.transform.position);
+
                 blackboard?.SetBlackboardValue(BlackboardKeys.BBTargetName.Str, KnownDetectedTarget.name);
 
                 float dist = Vector3.Distance(transform.position, KnownDetectedTarget.transform.position);
@@ -123,12 +125,19 @@ namespace Unity.FPS.AI
 
                 if (IsSeeingTarget)
                 {
-                    planner?.SetCurrentWorldState(StateDef.IS_TARGET_NEAR, dist < 5f);
+                    planner?.SetCurrentWorldState(StateDef.IS_IN_DANGER, dist < 10f);
                     planner?.SetCurrentWorldState(StateDef.IS_TARGET_IN_RANGE, dist < 20f);
+
+                    float y1 = gameObject.transform.rotation.eulerAngles.y;
+                    float y2 = KnownDetectedTarget.transform.rotation.eulerAngles.y;
+                    if (Mathf.Abs(y1 - y2) > 90f)
+                    {
+                        planner?.SetCurrentWorldState(StateDef.IS_IN_DANGER, true);
+                    }
                 }
                 else
                 {
-                    planner?.SetCurrentWorldState(StateDef.IS_TARGET_NEAR, false);
+                    planner?.SetCurrentWorldState(StateDef.IS_IN_DANGER, false);
                     planner?.SetCurrentWorldState(StateDef.IS_TARGET_IN_RANGE, false);
                 }
 

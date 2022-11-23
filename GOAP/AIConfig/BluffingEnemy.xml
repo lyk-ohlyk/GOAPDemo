@@ -6,16 +6,17 @@
         <State>IS_TARGET_NEAR|0</State> 
         <State>IS_TARGET_IN_RANGE|0</State>
         <State>TARGET_IN_SIGHT|0</State>
+        <State>IS_IN_DANGER|0</State>
     </WorldStates>
     <Goals>
         <Goal>
             <Name>Self-protextion</Name>
             <PreConditions>
-                <State>IS_TARGET_NEAR|1</State>
+                <State>IS_IN_DANGER|1</State>
             </PreConditions>
             <TargetStates>
                 <State>
-                    IS_TARGET_NEAR|0
+                    IS_IN_DANGER|0
                 </State>
             </TargetStates>
         </Goal>
@@ -24,6 +25,7 @@
             <PreConditions>
                 <State>HAS_TARGET|1</State>
                 <State>IS_TARGET_IN_RANGE|1</State>
+                <State>TARGET_IN_SIGHT|1</State>
             </PreConditions>
             <TargetStates>
                 <State>
@@ -35,22 +37,21 @@
             <Name>Get near to target</Name>
             <PreConditions>
                 <State>HAS_TARGET|1</State>
-                <State>IS_TARGET_IN_RANGE|1</State>
+                <State>IS_TARGET_IN_RANGE|0</State>
             </PreConditions>
             <TargetStates>
-                <State>
-                    IS_TARGET_IN_RANGE|0
-                </State>
+                <State>IS_TARGET_IN_RANGE|1</State>
+                <State>TARGET_IN_SIGHT|1</State>
             </TargetStates>
         </Goal>
         <Goal>
             <Name>Guard</Name>
             <PreConditions>
-                <State>HAS_TARGET|1</State>
+                <State>HAS_TARGET|0</State>
             </PreConditions>
             <TargetStates>
                 <State>
-                    HAS_TARGET|0
+                    HAS_TARGET|1
                 </State>
             </TargetStates>
         </Goal>
@@ -72,10 +73,10 @@
             <Name>Frightened</Name>
             <Behavior>Frightened</Behavior>
             <PreConditions>
-                <State>IS_TARGET_NEAR|1</State>
+                <State>IS_IN_DANGER|1</State>
             </PreConditions>
             <Effects>
-                <Effect>HAS_TARGET|0</Effect>
+                <Effect>IS_IN_DANGER|0</Effect>
             </Effects>
             <CostFunc>FrightDistCost</CostFunc>
         </Action>

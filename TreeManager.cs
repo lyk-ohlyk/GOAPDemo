@@ -59,12 +59,39 @@ public class TreeManager : MonoBehaviour
             }
         }
 
+        if (CurrentTreeIndex < 0)
+        {
+            return;
+        }
+
         CurrentTreeName = m_BehaviorTrees?[CurrentTreeIndex].TreeName;
 
         AIBehaviorTree tree = m_BehaviorTrees?[CurrentTreeIndex];
         if (tree != null)
         {
             tree.BehaviorTreeTick();
+        }
+    }
+
+    public void SetCurTreeName(string treeName)
+    {
+        int index = 0;
+        foreach (var tree in m_BehaviorTrees)
+        {
+            if (tree.TreeName == treeName)
+            {
+                CurrentTreeName = treeName;
+                CurrentTreeIndex = index;
+                break;
+            }
+
+            index += 1;
+        }
+
+        if (index == m_BehaviorTrees.Count)
+        {
+            CurrentTreeName = "";
+            CurrentTreeIndex = -1;
         }
     }
 

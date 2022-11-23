@@ -10,6 +10,7 @@ namespace GOAP
         IS_TARGET_NEAR,
         IS_TARGET_IN_RANGE,
         TARGET_IN_SIGHT,
+        IS_IN_DANGER, 
     };
 
     public class WorldState

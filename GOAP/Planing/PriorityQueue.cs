@@ -19,10 +19,6 @@ namespace GOAP
         bool m_IsMinPriorityQueue;
         public int Count { get { return queue.Count; } }
 
-        /// <summary>
-        /// If min queue or max queue
-        /// </summary>
-        /// <param name="isMinPriorityQueue"></param>
         public PriorityQueue(bool isMinPriorityQueue = false)
         {
             m_IsMinPriorityQueue = isMinPriorityQueue;
@@ -90,9 +86,6 @@ namespace GOAP
             return false;
         }
 
-        /// <summary>
-        /// Maintain max heap
-        /// </summary>
         private void BuildHeapMax(int i)
         {
             while (i >= 0 && queue[(i - 1) / 2].Priority < queue[i].Priority)
@@ -101,9 +94,7 @@ namespace GOAP
                 i = (i - 1) / 2;
             }
         }
-        /// <summary>
-        /// Maintain min heap
-        /// </summary>
+
         private void BuildHeapMin(int i)
         {
             while (i >= 0 && queue[(i - 1) / 2].Priority > queue[i].Priority)

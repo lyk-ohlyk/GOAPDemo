@@ -6,6 +6,9 @@ using GOAP;
 
 public class PlayFrightenedAction : Node
 {
+
+    EnemyController m_EnemyController;
+
     public override NodeState Evaluate()
     {
         GameObject owner = GetOwner() as GameObject;
@@ -21,6 +24,9 @@ public class PlayFrightenedAction : Node
         {
             return NodeState.FAILURE;
         }
+
+        m_EnemyController = owner.GetComponent<EnemyController>();
+        m_EnemyController?.SetNavDestination(owner.transform.position);
 
         owner.transform.position = Vector3.MoveTowards(
             owner.transform.position,

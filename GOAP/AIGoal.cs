@@ -8,6 +8,12 @@ namespace GOAP
         public StateCondition TargetStates { get; private set; }
         public StateCondition PreCondition { get; private set; }
 
+        public AIGoal()
+        {
+            PreCondition = new StateCondition();
+            TargetStates = new StateCondition();
+        }
+
         public void SetTargetState(StateCondition state)
         {
             TargetStates = state;
@@ -21,6 +27,11 @@ namespace GOAP
         public int GetUnmetStatesCount(AIWorldStates worldStates)
         {
             return worldStates.GetUnmetCount(TargetStates);
+        }
+
+        public bool IsPreconditionMet(AIWorldStates worldStates)
+        {
+            return worldStates.IsConditionMet(PreCondition);
         }
     }
 }

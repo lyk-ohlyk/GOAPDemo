@@ -20,16 +20,18 @@ namespace GOAP
         CostFuncs m_CostFuncs;
 
         AIWorldStates m_CurStates;
-        AIWorldStates m_TargetStates;
-
         AIBlackboard blackboard;
+
+        TreeManager treeManager;
 
         float m_LastUpdateTime = 0f;
         float m_StringUpdateTick = 0.2f;
 
         private void Start()
         {
-            blackboard = gameObject.GetComponent<AIBlackboard>();
+            blackboard = GetComponent<AIBlackboard>();
+            treeManager = GetComponent<TreeManager>();
+
             m_CostFuncs = new CostFuncs();
             m_CostFuncs.SetCostOwner(gameObject);
             LoadConfig();
@@ -37,10 +39,44 @@ namespace GOAP
 
         private void Update()
         {
-            if (Time.time - m_LastUpdateTime > m_StringUpdateTick)
+            if (Time.time - m_LastUpdateTime < m_StringUpdateTick)
             {
-                m_LastUpdateTime = Time.time;
-                UpdateShowStrings();
+                return;
+            }
+
+            m_LastUpdateTime = Time.time;
+            UpdateShowStrings();
+
+            AIAction planAction = null;
+
+            foreach (AIGoal goal in m_Goals)
+            {
+                if (goal.IsPreconditionMet(m_CurStates))
+                {
+
+                    Debug.Log("Goal pre: " + goal.PreCondition.GetConditionString() + ", State:" + m_CurStates.GetStatesString());
+
+                    string targetString = m_CurStates.GetStateAfterEffect(goal.TargetStates);                             
+                    AIWorldStates targetStates = new AIWorldStates(targetString);
+                    planAction = PlanAction(targetStates);
+
+                    if (planAction != null)
+                    {
+                        Debug.Log("Goal: " + goal.name + ", plan action: " + planAction.BehaviorName);
+                        break;
+                    }
+                }
+            }
+
+            if (planAction != null)
+            {
+                treeManager = GetComponent<TreeManager>();
+                treeManager?.SetCurTreeName(planAction.BehaviorName);
+
+                if (treeManager == null)
+                {
+                    Debug.Log("Tree Manager is nullllllll.");
+                }
             }
         }
 
@@ -162,10 +198,11 @@ namespace GOAP
         StateCondition ParseStates(XElement xElement)
         {
             StateCondition stateCondition = new StateCondition();
+
             foreach (var state in xElement.Elements())
             {
                 string[] stateStr = state.Value.Split('|');
-                stateCondition.SetState(stateStr[0], stateStr[0][1] == '1' ? true : false);
+                stateCondition.SetState(stateStr[0], stateStr[1][0] == '1' ? true : false);
             }
             return stateCondition;
         }
@@ -195,7 +232,7 @@ namespace GOAP
             GoalShowList = new List<string>();
             foreach (var goal in m_Goals)
             {
-                GoalShowList.Add(goal.name);
+                GoalShowList.Add(goal.name + "-" + goal.PreCondition.GetConditionString());
             }
 
             ActionsShowList = new List<string>();
@@ -208,20 +245,23 @@ namespace GOAP
 
         /// Run A* to get a valid plan.
         ///     Current vertex: m_CurStates; 
-        ///     Target vertex:  m_TargetStates
+        ///     Target vertex:  targetStates
         ///     Edges: AIActions that fit the current WorldStates. Each edge lead to a vertex based on AIAction.m_Effect
         ///     Edge weights: Cost of actions.
-        private AIAction PlanAction()
+        private AIAction PlanAction(AIWorldStates targetStates)
         {
             string startPoint = m_CurStates.GetStatesString();
-            string curPoint = m_CurStates.GetStatesString();
-            string targetPoint = m_TargetStates.GetStatesString();
+            string targetPoint = targetStates.GetStatesString();
+
+            Debug.Log("startPoint:" + startPoint + "; targetPoint:" + targetPoint);
+
+            List<string> debugList = new List<string>();
 
             PriorityQueue<string> priorityQueue = new PriorityQueue<string>();
 
             // Record state cost, or vertex distance.
             Dictionary<string, float> stateCostsDict = new Dictionary<string, float>();
-            stateCostsDict[curPoint] = 0f;
+            stateCostsDict[startPoint] = 0f;
 
             // Record previous vertex for backtracking, to find the first action.
             Dictionary<string, Tuple<string, AIAction>> preState = new Dictionary<string, Tuple<string, AIAction>>();
@@ -230,7 +270,9 @@ namespace GOAP
             HashSet<string> visited = new HashSet<string>();
 
             // Init Min Heap
-            priorityQueue.Enqueue(curPoint, 0f);
+            priorityQueue.Enqueue(startPoint, 0f);
+
+            string curPoint;
             while (priorityQueue.Count > 0)
             {
                 curPoint = priorityQueue.Dequeue();
@@ -247,6 +289,11 @@ namespace GOAP
 
                 foreach (var edge in edges)
                 {
+                    Debug.Log("Found edges:" + edge.name);
+                }
+
+                foreach (var edge in edges)
+                {
                     float totalCost = stateCostsDict[curPoint];
                     totalCost += edge.CalcCost(blackboard);
                     string nextPoint = curStates.GetStateAfterEffect(edge.ActionEffect);
@@ -256,7 +303,7 @@ namespace GOAP
 
                     // Heuristic
                     AIWorldStates nextState = new AIWorldStates(nextPoint);
-                    totalCost += CalcDistBetweenStates(m_TargetStates, nextState);
+                    totalCost += CalcDistBetweenStates(targetStates, nextState);
 
                     // Update cost
                     if (!stateCostsDict.ContainsKey(nextPoint))
@@ -268,6 +315,9 @@ namespace GOAP
                     }
                     else if (stateCostsDict[nextPoint] > totalCost)
                     {
+                        stateCostsDict[nextPoint] = totalCost;
+                        preState[nextPoint] = new Tuple<string, AIAction>(curPoint, edge);
+
                         priorityQueue.UpdatePriority(nextPoint, totalCost);
                     }
                 }
@@ -278,16 +328,45 @@ namespace GOAP
                 return null; // No Action can be found.
             }
 
+            Debug.Log("Target is reached." + targetPoint);
+
             // Backtracking to get Action.
             string backString = targetPoint;
             AIAction nextAction = null;
             while (backString != startPoint)
             {
-                backString = preState[backString].Item1;
+                debugList.Add(backString);
+
                 nextAction = preState[backString].Item2;
+                backString = preState[backString].Item1;
+            }
+
+            foreach (string path in debugList)
+            {
+                Debug.Log("Reverse plan path: " + path);
             }
 
             return nextAction;
+        }
+
+        /// <summary>
+        /// Check if state string [a] contains state string [b].
+        /// Here we only care about the '1's.
+        /// lyk dev TODO: States should be defined as "interested" or "not intereseted".
+        /// </summary>
+        private bool IsContainState(string a, string b)
+        {
+            bool isContained = true;
+            for (int i = 0; i < AIWorldStates.StateCount; ++i)
+            {
+                if (b[i] == '1' && a[i] == '0')
+                {
+                    isContained = false;
+                    break;
+                }
+            }
+
+            return isContained;
         }
 
         /// <summary>

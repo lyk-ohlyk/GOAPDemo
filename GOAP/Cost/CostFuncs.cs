@@ -47,7 +47,7 @@ namespace GOAP
         {
             if (blackboard != null) return true;
             blackboard = gameObject.GetComponent<AIBlackboard>();
-            return blackboard == null;
+            return blackboard != null;
         }
 
         GameObject GetCostTarget()

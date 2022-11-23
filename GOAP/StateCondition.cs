@@ -29,5 +29,16 @@ namespace GOAP
                 Debug.Log("StateCondition:" + state.Key + ", " + state.Value);
             }
         }
+
+        public string GetConditionString()
+        {
+            string res = "";
+            foreach (var state in StateDict)
+            {
+                res += state.Key.ToString() + ":" + state.Value + "; ";
+            }
+
+            return res;
+        }
     }
 }
