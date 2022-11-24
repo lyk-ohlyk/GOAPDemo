@@ -16,6 +16,9 @@ public class TreeManager : MonoBehaviour
 
     public List<AIBehaviorTree> m_BehaviorTrees;
 
+    private int m_LastTreeIndex;
+    private float m_LastTreeExitTimeStamp;
+
     private float m_ActionTickTime = 0.1f;
     private float m_TickTimer = 0f;
 
@@ -24,7 +27,8 @@ public class TreeManager : MonoBehaviour
     {
         m_BehaviorTrees = new List<AIBehaviorTree>();
         BehaviourTreeNames = new List<string>();
-        CurrentTreeIndex = 1;  // lyk dev TODO: choose different tree.
+        CurrentTreeIndex = 0;
+        m_LastTreeIndex = -1;
 
         LoadBehaviorTrees();
 
@@ -39,9 +43,9 @@ public class TreeManager : MonoBehaviour
     void LoadBehaviorTrees()
     // lyk dev TODO
     {
+        m_BehaviorTrees.Add(new Patrol());
         m_BehaviorTrees.Add(new MoveToTarget());
         m_BehaviorTrees.Add(new Frightened());
-        m_BehaviorTrees.Add(new Patrol());
         m_BehaviorTrees.Add(new Attack());
     }
 
@@ -67,7 +71,7 @@ public class TreeManager : MonoBehaviour
         CurrentTreeName = m_BehaviorTrees?[CurrentTreeIndex].TreeName;
 
         AIBehaviorTree tree = m_BehaviorTrees?[CurrentTreeIndex];
-        if (tree != null)
+        if (tree != null && (Time.time - m_LastTreeExitTimeStamp) > tree.GetTreeExitTime())
         {
             tree.BehaviorTreeTick();
         }
@@ -93,6 +97,12 @@ public class TreeManager : MonoBehaviour
             CurrentTreeName = "";
             CurrentTreeIndex = -1;
         }
+
+        if (CurrentTreeIndex != m_LastTreeIndex)
+        {
+            m_LastTreeExitTimeStamp = Time.time;
+        }
+        m_LastTreeIndex = CurrentTreeIndex;
     }
 
     private void OnDestroy()

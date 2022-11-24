@@ -216,6 +216,7 @@ namespace Unity.FPS.AI
 
             Color currentColor = OnHitBodyGradient.Evaluate((Time.time - m_LastTimeDamaged) / FlashOnHitDuration);
             m_BodyFlashMaterialPropertyBlock.SetColor("_EmissionColor", currentColor);
+
             foreach (var data in m_BodyRenderers)
             {
                 data.Renderer.SetPropertyBlock(m_BodyFlashMaterialPropertyBlock, data.MaterialIndex);

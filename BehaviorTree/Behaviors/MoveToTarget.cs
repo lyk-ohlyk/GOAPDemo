@@ -10,6 +10,11 @@ namespace BehaviorTree
 
         public float DistanceToStop = 5f;
 
+        public MoveToTarget()
+        {
+            ExitTime = 0.3f;
+        }
+
         protected override void SetTreeName()
         {
             TreeName = "MoveToTarget";

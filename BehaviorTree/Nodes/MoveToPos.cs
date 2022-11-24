@@ -44,8 +44,6 @@ public class NodeMoveTo : Node
         if (distance > MinDist)
         {
             float speedCoefficient = Mathf.Min((float)(distance - MinDist), 1f);
-            Debug.Log("Target position:" + target.transform.position);
-
             m_EnemyController?.SetNavDestination(target.transform.position);
             owner.transform.LookAt(target.transform.position);
         }

@@ -4,6 +4,11 @@ namespace BehaviorTree
 {
     public class Attack : AIBehaviorTree
     {
+        public Attack()
+        {
+            ExitTime = 1.0f;
+        }
+
         protected override void SetTreeName()
         {
             TreeName = "Attack";

@@ -11,6 +11,7 @@ namespace BehaviorTree
 
         private bool m_NeedExit = false;
 
+        protected float ExitTime = 0f;
 
         public void TreeInit(GameObject owner)
         {
@@ -39,6 +40,10 @@ namespace BehaviorTree
             return NodeState.FAILURE;
         }
 
+        public float GetTreeExitTime()
+        {
+            return ExitTime;
+        }
     }
 
 }

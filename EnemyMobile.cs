@@ -62,10 +62,9 @@ namespace Unity.FPS.AI
 
         void Update()
         {
-            return;  // lyk debug TODO: let's use GOAP to control robots!
-
-            UpdateAiStateTransitions();
-            UpdateCurrentAiState();
+            // lyk debug TODO: let's use GOAP to control robots!
+            // UpdateAiStateTransitions();
+            // UpdateCurrentAiState();
 
             float moveSpeed = m_EnemyController.NavMeshAgent.velocity.magnitude;
 
@@ -156,6 +155,7 @@ namespace Unity.FPS.AI
                 AudioUtility.CreateSFX(OnDetectSfx, transform.position, AudioUtility.AudioGroups.EnemyDetection, 1f);
             }
 
+            Debug.Log("k_AnimAlertedParameter");
             Animator.SetBool(k_AnimAlertedParameter, true);
         }
 

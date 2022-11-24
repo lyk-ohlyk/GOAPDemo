@@ -54,7 +54,7 @@ namespace GOAP
                 if (goal.IsPreconditionMet(m_CurStates))
                 {
 
-                    Debug.Log("Goal pre: " + goal.PreCondition.GetConditionString() + ", State:" + m_CurStates.GetStatesString());
+                    // Debug.Log("Goal pre: " + goal.PreCondition.GetConditionString() + ", State:" + m_CurStates.GetStatesString());
 
                     string targetString = m_CurStates.GetStateAfterEffect(goal.TargetStates);                             
                     AIWorldStates targetStates = new AIWorldStates(targetString);
@@ -62,7 +62,7 @@ namespace GOAP
 
                     if (planAction != null)
                     {
-                        Debug.Log("Goal: " + goal.name + ", plan action: " + planAction.BehaviorName);
+                        // Debug.Log("Goal: " + goal.name + ", plan action: " + planAction.BehaviorName);
                         break;
                     }
                 }
@@ -253,8 +253,6 @@ namespace GOAP
             string startPoint = m_CurStates.GetStatesString();
             string targetPoint = targetStates.GetStatesString();
 
-            Debug.Log("startPoint:" + startPoint + "; targetPoint:" + targetPoint);
-
             List<string> debugList = new List<string>();
 
             PriorityQueue<string> priorityQueue = new PriorityQueue<string>();
@@ -286,11 +284,11 @@ namespace GOAP
 
                 AIWorldStates curStates = new AIWorldStates(curPoint);
                 List<AIAction> edges = GetAIActions(curStates);
-
+/*
                 foreach (var edge in edges)
                 {
                     Debug.Log("Found edges:" + edge.name);
-                }
+                }*/
 
                 foreach (var edge in edges)
                 {
@@ -328,7 +326,7 @@ namespace GOAP
                 return null; // No Action can be found.
             }
 
-            Debug.Log("Target is reached." + targetPoint);
+            // Debug.Log("Target is reached." + targetPoint);
 
             // Backtracking to get Action.
             string backString = targetPoint;
@@ -340,11 +338,11 @@ namespace GOAP
                 nextAction = preState[backString].Item2;
                 backString = preState[backString].Item1;
             }
-
+/*
             foreach (string path in debugList)
             {
                 Debug.Log("Reverse plan path: " + path);
-            }
+            }*/
 
             return nextAction;
         }

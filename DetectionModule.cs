@@ -14,6 +14,9 @@ namespace Unity.FPS.AI
         [Tooltip("The max distance at which the enemy can see targets")]
         public float DetectionRange = 15f;
 
+        [Tooltip("The max distance at which the enemy will instantly lost")]
+        public float LostRange = 30f;
+
         [Tooltip("The max distance at which the enemy can attack its target")]
         public float AttackRange = 10f;
 
@@ -27,6 +30,7 @@ namespace Unity.FPS.AI
         public UnityAction onLostTarget;
 
         public GameObject KnownDetectedTarget { get; private set; }
+        public GameObject LastDetectedTarget { get; private set; }
         public bool IsTargetInAttackRange { get; private set; }
         public bool IsSeeingTarget { get; private set; }
         public bool HadKnownTarget { get; private set; }
@@ -45,6 +49,8 @@ namespace Unity.FPS.AI
         {
             m_ActorsManager = FindObjectOfType<ActorsManager>();
             DebugUtility.HandleErrorIfNullFindObject<ActorsManager, DetectionModule>(m_ActorsManager, this);
+
+            LastDetectedTarget = null;
         }
 
         public virtual void HandleTargetDetection(Actor actor, Collider[] selfColliders)
@@ -71,69 +77,76 @@ namespace Unity.FPS.AI
 
             // Find the closest visible hostile actor
             float sqrDetectionRange = DetectionRange * DetectionRange;
+            float sqrLostRange = LostRange * LostRange;
             IsSeeingTarget = false;
             float closestSqrDistance = Mathf.Infinity;
+
             foreach (Actor otherActor in m_ActorsManager.Actors)
             {
-                if (otherActor.Affiliation != actor.Affiliation)
+                if (otherActor.Affiliation == actor.Affiliation)
+                    continue;
+
+                float sqrDistance = (otherActor.transform.position - DetectionSourcePoint.position).sqrMagnitude;
+                if (sqrDistance >= sqrLostRange || sqrDistance >= closestSqrDistance)
+                    continue;
+
+                // Check for obstructions
+                RaycastHit[] hits = Physics.RaycastAll(DetectionSourcePoint.position,
+                    (otherActor.AimPoint.position - DetectionSourcePoint.position).normalized, LostRange,
+                    -1, QueryTriggerInteraction.Ignore);
+                RaycastHit closestValidHit = new RaycastHit();
+                closestValidHit.distance = Mathf.Infinity;
+                bool foundValidHit = false;
+                foreach (var hit in hits)
                 {
-                    float sqrDistance = (otherActor.transform.position - DetectionSourcePoint.position).sqrMagnitude;
-                    if (sqrDistance < sqrDetectionRange && sqrDistance < closestSqrDistance)
+                    if (!selfColliders.Contains(hit.collider) && hit.distance < closestValidHit.distance)
                     {
-                        // Check for obstructions
-                        RaycastHit[] hits = Physics.RaycastAll(DetectionSourcePoint.position,
-                            (otherActor.AimPoint.position - DetectionSourcePoint.position).normalized, DetectionRange,
-                            -1, QueryTriggerInteraction.Ignore);
-                        RaycastHit closestValidHit = new RaycastHit();
-                        closestValidHit.distance = Mathf.Infinity;
-                        bool foundValidHit = false;
-                        foreach (var hit in hits)
-                        {
-                            if (!selfColliders.Contains(hit.collider) && hit.distance < closestValidHit.distance)
-                            {
-                                closestValidHit = hit;
-                                foundValidHit = true;
-                            }
-                        }
-
-                        if (foundValidHit)
-                        {
-                            Actor hitActor = closestValidHit.collider.GetComponentInParent<Actor>();
-                            if (hitActor == otherActor)
-                            {
-                                IsSeeingTarget = true;
-                                closestSqrDistance = sqrDistance;
-
-                                TimeLastSeenTarget = Time.time;
-                                KnownDetectedTarget = otherActor.AimPoint.gameObject;
-                            }
-                        }
+                        closestValidHit = hit;
+                        foundValidHit = true;
                     }
+                }
+
+                if (!foundValidHit)
+                    continue;
+
+                Actor hitActor = closestValidHit.collider.GetComponentInParent<Actor>();
+                if (hitActor == otherActor)
+                {
+                    IsSeeingTarget = true;
+                    closestSqrDistance = sqrDistance;
+
+                    TimeLastSeenTarget = Time.time;
+                    KnownDetectedTarget = otherActor.AimPoint.gameObject;
+                    break;
                 }
             }
 
+            float dist = 0f;
             if (KnownDetectedTarget != null)
             {
+                dist = Vector3.Distance(transform.position, KnownDetectedTarget.transform.position);
+                if (dist > DetectionRange && LastDetectedTarget != KnownDetectedTarget)
+                {
+                    KnownDetectedTarget = null;
+                }
+            }
+            LastDetectedTarget = KnownDetectedTarget;
 
-                Debug.Log("Position:" + KnownDetectedTarget.transform.position);
-
+            if (KnownDetectedTarget != null)
+            {
                 blackboard?.SetBlackboardValue(BlackboardKeys.BBTargetName.Str, KnownDetectedTarget.name);
 
-                float dist = Vector3.Distance(transform.position, KnownDetectedTarget.transform.position);
                 IsTargetInAttackRange = KnownDetectedTarget != null && dist <= AttackRange;
                 blackboard?.SetBlackboardValue(BlackboardKeys.BBTargetDist.Str, dist);
 
                 if (IsSeeingTarget)
                 {
-                    planner?.SetCurrentWorldState(StateDef.IS_IN_DANGER, dist < 10f);
                     planner?.SetCurrentWorldState(StateDef.IS_TARGET_IN_RANGE, dist < 20f);
 
                     float y1 = gameObject.transform.rotation.eulerAngles.y;
                     float y2 = KnownDetectedTarget.transform.rotation.eulerAngles.y;
-                    if (Mathf.Abs(y1 - y2) > 90f)
-                    {
-                        planner?.SetCurrentWorldState(StateDef.IS_IN_DANGER, true);
-                    }
+
+                    planner?.SetCurrentWorldState(StateDef.IS_IN_DANGER, GetAngleDiff(y1, y2) > 140f);
                 }
                 else
                 {
@@ -145,8 +158,7 @@ namespace Unity.FPS.AI
             }
 
             // Detection events
-            if (!HadKnownTarget &&
-                KnownDetectedTarget != null)
+            if (!HadKnownTarget && KnownDetectedTarget != null)
             {
                 OnDetect();
 
@@ -154,8 +166,7 @@ namespace Unity.FPS.AI
                 Debug.Log("Target name: " + KnownDetectedTarget.name);
             }
 
-            if (HadKnownTarget &&
-                KnownDetectedTarget == null)
+            if (HadKnownTarget && KnownDetectedTarget == null)
             {
                 OnLostTarget();
 
@@ -188,6 +199,19 @@ namespace Unity.FPS.AI
             {
                 Animator.SetTrigger(k_AnimAttackParameter);
             }
+        }
+
+        private float GetAngleDiff(float a, float b)
+        {
+            float abs = Mathf.Abs(a - b);
+            if (abs < 180)
+            {
+                return abs;
+            }
+
+            float larger = Mathf.Max(a, b);
+            float smaller = Mathf.Min(a, b);
+            return smaller - larger + 360f;
         }
     }
 }
