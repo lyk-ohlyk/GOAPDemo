@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using Unity.FPS.AI;
 
 namespace GOAP
 {
@@ -34,13 +35,21 @@ namespace GOAP
         {
 
             GameObject target = GetCostTarget();
-            if (target == null) return COST_MAX;
+            if (target == null)
+                return COST_MAX;
+            EnemyController enemyController = gameObject.GetComponent<EnemyController>();
+            if (!enemyController)
+                return COST_MAX;
 
-            float distance = (gameObject.transform.position - target.transform.position).sqrMagnitude;
+            Vector3 jumpPos = enemyController.GetJumpPoint();
+            float distance = Vector3.Distance(gameObject.transform.position, target.transform.position);
+            float jumpDistance = Vector3.Distance(jumpPos, target.transform.position);
+            float nearCost = Vector3.Distance(jumpPos, gameObject.transform.position);
 
-            // TODO: Jump point query.
-
-            return distance;
+            float cost = Convert.ToInt32(nearCost < 1.0) * 10;  // Avoid too near jump.
+            cost += Convert.ToInt32((jumpDistance + 0.2) > distance) * 10f;  // Ensure jump make target near.
+            cost += (jumpDistance / distance) * 1.5f;  // Ensure jump make target near.
+            return cost;
         }
 
         bool CheckBlackboard()

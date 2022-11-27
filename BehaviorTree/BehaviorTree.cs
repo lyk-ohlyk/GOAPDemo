@@ -6,18 +6,38 @@ namespace BehaviorTree
     public abstract class AIBehaviorTree
     {
         public string TreeName;
+        protected GameObject Owner;
 
         private Node m_Root = null;
-
         private bool m_NeedExit = false;
 
-        protected float ExitTime = 0f;
+        protected float TreeStartTimestamp = 0f;  // Used in bahavior tree timer.
+        protected float EnterTime = 0f;  // Run behaviors after EnterTime.
 
         public void TreeInit(GameObject owner)
         {
+            Owner = owner;
             m_Root = SetupTree();
             m_Root.SetOwner(owner);
             SetTreeName();
+        }
+
+        /// <summary>
+        /// Initialize tree parameters every excution.
+        /// </summary>
+        public virtual void InitTreeStates()
+        {
+
+        }
+
+        public void TryStopTree()
+        {
+            m_NeedExit = true;
+        }
+
+        public void SetStartTime(float startTimestamp)
+        {
+            TreeStartTimestamp = startTimestamp;
         }
 
         protected virtual void SetTreeName()
@@ -35,14 +55,14 @@ namespace BehaviorTree
             }
 
             if (m_Root != null)
-                return m_Root.Evaluate();
+                return m_Root.TryEvaluate();
 
             return NodeState.FAILURE;
         }
 
-        public float GetTreeExitTime()
+        public float GetTreeEnterTime()
         {
-            return ExitTime;
+            return EnterTime;
         }
     }
 

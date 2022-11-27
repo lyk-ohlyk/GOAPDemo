@@ -89,7 +89,7 @@ namespace Unity.FPS.AI
         [Tooltip("Color of thethe sphere gizmo representing the detection range")]
         public Color RefelectTestColor = Color.blue;
 
-        public AIWorldStates worldStates;
+        public AIWorldStates WorldStates;
 
         public UnityAction onAttack;
         public UnityAction onDetectedTarget;
@@ -104,6 +104,9 @@ namespace Unity.FPS.AI
         MaterialPropertyBlock m_EyeColorMaterialPropertyBlock;
 
         public PatrolPath PatrolPath { get; set; }
+        public JumpPoints JumpPoints{ get; set; }
+        private bool m_IsJumping = false;
+        private bool m_IsJumpFinished = false;
         public GameObject KnownDetectedTarget => DetectionModule.KnownDetectedTarget;
         public bool IsTargetInAttackRange => DetectionModule.IsTargetInAttackRange;
         public bool IsSeeingTarget => DetectionModule.IsSeeingTarget;
@@ -112,6 +115,7 @@ namespace Unity.FPS.AI
         public DetectionModule DetectionModule { get; private set; }
 
         int m_PathDestinationNodeIndex;
+        int m_JumpPointNodeIndex = -1;
         EnemyManager m_EnemyManager;
         ActorsManager m_ActorsManager;
         Health m_Health;
@@ -324,6 +328,11 @@ namespace Unity.FPS.AI
             }
         }
 
+        public void StopNavigation(bool stopNavi=true)
+        {
+            NavMeshAgent.isStopped = stopNavi;
+        }
+
         public void UpdatePathDestination(bool inverseOrder = false)
         {
             if (IsPathValid())
@@ -345,6 +354,59 @@ namespace Unity.FPS.AI
                     }
                 }
             }
+        }
+
+        public void SetIsJumping(bool value)
+        {
+            m_IsJumping = value;
+        }
+
+        public bool IsJumping()
+        {
+            return m_IsJumping;
+        }
+
+        public Vector3 GetJumpPoint()
+        {
+            if (m_JumpPointNodeIndex != -1)
+            {
+                return JumpPoints.JumpNodes[m_JumpPointNodeIndex].position;
+            }
+
+            if (!(JumpPoints && JumpPoints.JumpNodes.Count > 0))
+                return transform.position;
+            if (!KnownDetectedTarget)
+                return transform.position;
+
+            float curDist = Vector3.Distance(transform.position, KnownDetectedTarget.transform.position);
+            int nodeIndex = -1;
+            float minDist = 10000f;
+            foreach (var jumpNode in JumpPoints.JumpNodes)
+            {
+                float dist = Vector3.Distance(jumpNode.position, KnownDetectedTarget.transform.position);
+                if (dist < curDist + 1.0f && dist < minDist)
+                {
+                    nodeIndex = JumpPoints.JumpNodes.IndexOf(jumpNode);
+                    minDist = dist;
+                }
+            }
+
+            if (nodeIndex != -1 && JumpPoints.TryOccupyJumpNode(nodeIndex))
+            {
+                m_JumpPointNodeIndex = nodeIndex;
+                return JumpPoints.JumpNodes[m_JumpPointNodeIndex].position;
+            }
+            else
+            {
+                m_JumpPointNodeIndex = -1;
+                return transform.position;
+            }
+        }
+
+        public void ReleaseJumpPoint(Vector3 jumpPos)
+        {
+            m_JumpPointNodeIndex = -1;
+            JumpPoints.ReleaseJumpNode(jumpPos);
         }
 
         void OnDamaged(float damage, GameObject damageSource)

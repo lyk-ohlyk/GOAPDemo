@@ -60,12 +60,6 @@ namespace GOAP
             return worldStates.IsConditionMet(ActionEffect);
         }
 
-        public bool TryPlayAction(AIWorldStates worldStates)
-        {
-            // lyk dev TODO: Run behavior tree.
-            return false;
-        }
-
         public AIWorldStates GetEffectedStates(AIWorldStates worldStates)
         {
             if (!IsPreconditionMet(worldStates))

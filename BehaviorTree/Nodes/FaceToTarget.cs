@@ -4,9 +4,10 @@ using UnityEngine;
 using BehaviorTree;
 using Unity.FPS.AI;
 
-public class GetPatrolPoint : Node
+public class FaceToTarget : Node
 {
     EnemyController m_EnemyController;
+
     protected override NodeState Evaluate()
     {
         GameObject owner = GetOwner() as GameObject;
@@ -14,11 +15,18 @@ public class GetPatrolPoint : Node
         {
             m_EnemyController = owner.GetComponent<EnemyController>();
         }
+        CheckBlackboard();
+        if (blackboard == null || m_EnemyController == null)
+        {
+            return NodeState.FAILURE;
+        }
+        GameObject target = blackboard.GetTarget();
+        if (target == null)
+        {
+            return NodeState.FAILURE;
+        }
 
-        m_EnemyController?.StopNavigation(false);
-        m_EnemyController?.UpdatePathDestination();
-        m_EnemyController?.SetNavDestination(m_EnemyController.GetDestinationOnPath());
-
+        owner.transform.LookAt(target.transform);
         return NodeState.SUCCESS;
     }
 }

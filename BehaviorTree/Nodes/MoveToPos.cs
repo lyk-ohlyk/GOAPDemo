@@ -17,7 +17,7 @@ public class NodeMoveTo : Node
         MinDist = dist;
     }
 
-    public override NodeState Evaluate()
+    protected override NodeState Evaluate()
     {
         if (!CheckBlackboard())
         {
@@ -44,6 +44,7 @@ public class NodeMoveTo : Node
         if (distance > MinDist)
         {
             float speedCoefficient = Mathf.Min((float)(distance - MinDist), 1f);
+            m_EnemyController?.StopNavigation(false);
             m_EnemyController?.SetNavDestination(target.transform.position);
             owner.transform.LookAt(target.transform.position);
         }

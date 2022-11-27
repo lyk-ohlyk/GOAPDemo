@@ -6,17 +6,18 @@
         <State>IS_TARGET_NEAR|0</State> 
         <State>IS_TARGET_IN_RANGE|0</State>
         <State>TARGET_IN_SIGHT|0</State>
-        <State>IS_IN_DANGER|0</State>
+        <State>IS_LOW_HP|0</State>
     </WorldStates>
     <Goals>
         <Goal>
-            <Name>Self-protextion</Name>
+            <Name>Self-protection</Name>
             <PreConditions>
-                <State>IS_IN_DANGER|1</State>
+                <State>IS_LOW_HP|1</State>
+                <State>IS_TARGET_NEAR|1</State>
             </PreConditions>
             <TargetStates>
                 <State>
-                    IS_IN_DANGER|0
+                    IS_LOW_HP|0
                 </State>
             </TargetStates>
         </Goal>
@@ -73,10 +74,10 @@
             <Name>Frightened</Name>
             <Behavior>Frightened</Behavior>
             <PreConditions>
-                <State>IS_IN_DANGER|1</State>
+                <State>IS_LOW_HP|1</State>
             </PreConditions>
             <Effects>
-                <Effect>IS_IN_DANGER|0</Effect>
+                <Effect>IS_LOW_HP|0</Effect>
             </Effects>
             <CostFunc>FrightDistCost</CostFunc>
         </Action>
@@ -103,7 +104,7 @@
             </Effects>
             <CostFunc>ConstFunc|1</CostFunc>
         </Action>
-        <!--Action>
+        <Action>
             <Name>Jump</Name>
             <Behavior>Jump</Behavior>
             <PreConditions>
@@ -113,6 +114,6 @@
                 <Effect>HAS_TARGET|0</Effect>
             </Effects>
             <CostFunc>JumpCost</CostFunc>
-        </Action-->
+        </Action>
     </Actions>
 </Root>

@@ -35,7 +35,7 @@ namespace GOAP
 
         public abstract float GetPointValue(float point);
 
-        // lyk dev TODO: editable point insearting.
+        // lyk dev TODO: editable point inserting.
     }
 
     class LinearCurve : BaseCurve

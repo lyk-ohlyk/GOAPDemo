@@ -7,13 +7,13 @@ namespace BehaviorTree
         public Sequence() : base() { }
         public Sequence(List<Node> children) : base(children) { }
 
-        public override NodeState Evaluate()
+        protected override NodeState Evaluate()
         {
             bool anyChildIsRunning = false;
 
             foreach (Node node in NodeChildren)
             {
-                switch (node.Evaluate())
+                switch (node.TryEvaluate())
                 {
                     case NodeState.FAILURE:
                         state = NodeState.FAILURE;

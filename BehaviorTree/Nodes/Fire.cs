@@ -7,7 +7,13 @@ using Unity.FPS.AI;
 public class Fire : Node
 {
     EnemyController m_EnemyController;
-    public override NodeState Evaluate()
+
+    public Fire(float t) : base(t)
+    {
+
+    }
+
+    protected override NodeState Evaluate()
     {
         GameObject owner = GetOwner() as GameObject;
         if (m_EnemyController == null)
@@ -27,6 +33,7 @@ public class Fire : Node
 
         owner.transform.LookAt(target.transform);
         m_EnemyController?.TryAtack(target.transform.position);
+        m_EnemyController?.StopNavigation();
 
         return NodeState.SUCCESS;
     }

@@ -6,7 +6,7 @@ namespace BehaviorTree
     {
         public Attack()
         {
-            ExitTime = 1.0f;
+            EnterTime = .2f;
         }
 
         protected override void SetTreeName()
@@ -21,9 +21,10 @@ namespace BehaviorTree
             {
                 new Sequence(new List<Node>
                 {
-                    new Fire(),
+                    new FaceToTarget(),
+                    new Fire(1.0f),
                 }),
-            });
+            });;
 
             return root;
         }

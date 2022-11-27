@@ -12,7 +12,7 @@ namespace BehaviorTree
 
         public MoveToTarget()
         {
-            ExitTime = 0.3f;
+            EnterTime = 0.3f;
         }
 
         protected override void SetTreeName()

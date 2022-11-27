@@ -1,12 +1,12 @@
 # GOAPDemo - Design doc(temp)
 
-## Soldier Behaviors
+## Bot Behaviors
 
 ### Goal
 
     Self-protection, 
-        Current State: IS_IN_DANGER - 1
-        Target State: IS_IN_DANGER - 0
+        Current State: IS_LOW_HP - 1, IS_TARGET_NEAR - 1
+        Target State: IS_LOW_HP - 0
     Kill target, 
         Current State: HAS_TARGET - 1, TARGET_IN_SIGHT – 1, IS_TARGET_IN_RANGE – 1
         Target State: HAS_TARGET - 0
@@ -21,33 +21,39 @@
 
 ### Move to target
 
-    Precondition: HAS_TARGET
+    Precondition: HAS_TARGET - 1
     Effect: IS_TARGET_IN_RANGE – 1, TARGET_IN_SIGHT – 1
     Cost: 1.0
 
 ### Frightened
 
-    Precondition: IS_IN_DANGER
-    Effect: HAS_TARGET – 0
+    Precondition: IS_LOW_HP - 1
+    Effect: IS_LOW_HP – 0
     Cost: (distance – 2.0) / 2.0
 
 ### Attack
 
-    Precondition: IS_TARGET_IN_RANGE, TARGET_IN_SIGHT
+    Precondition: IS_TARGET_IN_RANGE - 1, TARGET_IN_SIGHT - 1
     Effect: HAS_TARGET – 0
     Cost: 1.0
 
 ### Patrol
 
-    Precondition: not HAS_TARGET
+    Precondition: HAS_TARGET - 0
     Effect: HAS_TARGET – 1
     Cost: 1.0
 
 ### Jump
 
-    Precondition: TARGET_IN_SIGHT.
+    Precondition: TARGET_IN_SIGHT - 1.
     Effect: HAS_TARGET - 0
     Cost: (Jump_position_distance - distance)
+
+### Hide
+
+    Precondition: IS_LOW_HP - 1.
+    Effect: IS_LOW_HP - 0
+    Cost: 1.0
 
 ## Basic functions
 
@@ -62,5 +68,4 @@
     IS_TARGET_NEAR
     IS_TARGET_IN_RANGE
     TARGET_IN_SIGHT
-    IS_IN_DANGER
-
+    IS_LOW_HP

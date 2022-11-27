@@ -21,6 +21,7 @@ public class TreeManager : MonoBehaviour
 
     private float m_ActionTickTime = 0.1f;
     private float m_TickTimer = 0f;
+    private NodeState m_LastTreeState;
 
     // Start is called before the first frame update
     void Start()
@@ -35,6 +36,7 @@ public class TreeManager : MonoBehaviour
         // lyk dev TODO: read trees from config.
         foreach (var tree in m_BehaviorTrees)
         {
+            Debug.Log("Tree:" + tree);
             tree.TreeInit(gameObject);
             BehaviourTreeNames.Add(tree.TreeName);
         }
@@ -47,12 +49,12 @@ public class TreeManager : MonoBehaviour
         m_BehaviorTrees.Add(new MoveToTarget());
         m_BehaviorTrees.Add(new Frightened());
         m_BehaviorTrees.Add(new Attack());
+        m_BehaviorTrees.Add(new Jump());
     }
 
     // Update is called once per frame
     void Update()
     {
-
         m_TickTimer += Time.deltaTime;
         if (m_TickTimer < m_ActionTickTime)
         {
@@ -62,7 +64,6 @@ public class TreeManager : MonoBehaviour
                 m_TickTimer -= m_ActionTickTime;
             }
         }
-
         if (CurrentTreeIndex < 0)
         {
             return;
@@ -71,14 +72,25 @@ public class TreeManager : MonoBehaviour
         CurrentTreeName = m_BehaviorTrees?[CurrentTreeIndex].TreeName;
 
         AIBehaviorTree tree = m_BehaviorTrees?[CurrentTreeIndex];
-        if (tree != null && (Time.time - m_LastTreeExitTimeStamp) > tree.GetTreeExitTime())
+        if (tree != null && (Time.time - m_LastTreeExitTimeStamp) > tree.GetTreeEnterTime())
         {
-            tree.BehaviorTreeTick();
+            m_LastTreeState = tree.BehaviorTreeTick();
+        }
+        else
+        {
+            m_LastTreeState = NodeState.FAILURE;
         }
     }
 
     public void SetCurTreeName(string treeName)
     {
+        if (m_LastTreeState == NodeState.RUNNING)
+        {
+            // Tree is still running.
+            Debug.Log("Tree is running:" + CurrentTreeName);
+            return;
+        }
+
         int index = 0;
         foreach (var tree in m_BehaviorTrees)
         {
@@ -96,12 +108,19 @@ public class TreeManager : MonoBehaviour
         {
             CurrentTreeName = "";
             CurrentTreeIndex = -1;
+            m_LastTreeIndex = -1;
         }
 
         if (CurrentTreeIndex != m_LastTreeIndex)
         {
             m_LastTreeExitTimeStamp = Time.time;
+            AIBehaviorTree tree = m_BehaviorTrees?[CurrentTreeIndex];
+            if (tree != null)
+            {
+                tree.InitTreeStates();
+            }
         }
+
         m_LastTreeIndex = CurrentTreeIndex;
     }
 

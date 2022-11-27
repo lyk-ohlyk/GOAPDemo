@@ -9,7 +9,7 @@ public class PlayFrightenedAction : Node
 
     EnemyController m_EnemyController;
 
-    public override NodeState Evaluate()
+    protected override NodeState Evaluate()
     {
         GameObject owner = GetOwner() as GameObject;
         if (owner == null)

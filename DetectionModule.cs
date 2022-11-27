@@ -42,6 +42,7 @@ namespace Unity.FPS.AI
         const string k_AnimAttackParameter = "Attack";
         const string k_AnimOnDamagedParameter = "OnDamaged";
 
+        Health m_Health;
         AIBlackboard blackboard;
         AIPlanner planner;
 
@@ -132,6 +133,11 @@ namespace Unity.FPS.AI
             }
             LastDetectedTarget = KnownDetectedTarget;
 
+            if (m_Health == null)
+                m_Health = gameObject.GetComponentInParent<Health>();
+            if (m_Health != null)
+                planner?.SetCurrentWorldState(StateDef.IS_LOW_HP, m_Health.GetRatio() < 0.3);
+
             if (KnownDetectedTarget != null)
             {
                 blackboard?.SetBlackboardValue(BlackboardKeys.BBTargetName.Str, KnownDetectedTarget.name);
@@ -142,16 +148,12 @@ namespace Unity.FPS.AI
                 if (IsSeeingTarget)
                 {
                     planner?.SetCurrentWorldState(StateDef.IS_TARGET_IN_RANGE, dist < 20f);
-
-                    float y1 = gameObject.transform.rotation.eulerAngles.y;
-                    float y2 = KnownDetectedTarget.transform.rotation.eulerAngles.y;
-
-                    planner?.SetCurrentWorldState(StateDef.IS_IN_DANGER, GetAngleDiff(y1, y2) > 140f);
+                    planner?.SetCurrentWorldState(StateDef.IS_TARGET_NEAR, dist < 10f);
                 }
                 else
                 {
-                    planner?.SetCurrentWorldState(StateDef.IS_IN_DANGER, false);
                     planner?.SetCurrentWorldState(StateDef.IS_TARGET_IN_RANGE, false);
+                    planner?.SetCurrentWorldState(StateDef.IS_TARGET_NEAR, false);
                 }
 
                 planner?.SetCurrentWorldState(StateDef.TARGET_IN_SIGHT, IsSeeingTarget);

@@ -13,16 +13,17 @@ namespace BehaviorTree
 
     public class Node
     {
+        public Node NodeParent;
+        public float lastExecutionTime = 0f;
+
         protected NodeState state;
         protected List<Node> NodeChildren = new List<Node>();
-
         protected AIBlackboard blackboard;
 
-        public Node NodeParent;
+        protected float timerDelta = 0f;  // Node timer.
 
         private WeakReference Owner;
-
-        Dictionary<string, object> m_DataContext = new Dictionary<string, object>();
+        private Dictionary<string, object> m_DataContext = new Dictionary<string, object>();  // lyk dev TODO: 上下文条件
 
         public Node()
         {
@@ -33,6 +34,13 @@ namespace BehaviorTree
         {
             foreach (Node child in children)
                 _Attach(child);
+        }
+
+        public Node(float timerT)
+        {
+            NodeParent = null;
+            Owner = null;
+            timerDelta = timerT;
         }
 
         public object GetOwner()
@@ -78,7 +86,23 @@ namespace BehaviorTree
             return !(blackboard == null);
         }
 
-        public virtual NodeState Evaluate() => NodeState.FAILURE;
+        protected virtual NodeState Evaluate() => NodeState.FAILURE;
+
+        virtual public NodeState TryEvaluate()
+        {
+            if (lastExecutionTime == 0)
+            {
+                lastExecutionTime = Time.time;
+                return NodeState.FAILURE;
+            }
+            if (Time.time - lastExecutionTime < timerDelta)
+            {
+                return NodeState.FAILURE;
+            }
+            lastExecutionTime = Time.time;
+
+            return Evaluate();
+        }
     }
 
 }

@@ -7,11 +7,11 @@ namespace BehaviorTree
         public Selector() : base() { }
         public Selector(List<Node> children) : base(children) { }
 
-        public override NodeState Evaluate()
+        protected override NodeState Evaluate()
         {
             foreach (Node node in NodeChildren)
             {
-                switch (node.Evaluate())
+                switch (node.TryEvaluate())
                 {
                     case NodeState.FAILURE:
                         continue;

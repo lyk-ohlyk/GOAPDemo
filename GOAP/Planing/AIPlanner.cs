@@ -53,16 +53,12 @@ namespace GOAP
             {
                 if (goal.IsPreconditionMet(m_CurStates))
                 {
-
-                    // Debug.Log("Goal pre: " + goal.PreCondition.GetConditionString() + ", State:" + m_CurStates.GetStatesString());
-
                     string targetString = m_CurStates.GetStateAfterEffect(goal.TargetStates);                             
                     AIWorldStates targetStates = new AIWorldStates(targetString);
                     planAction = PlanAction(targetStates);
 
                     if (planAction != null)
                     {
-                        // Debug.Log("Goal: " + goal.name + ", plan action: " + planAction.BehaviorName);
                         break;
                     }
                 }
@@ -326,8 +322,6 @@ namespace GOAP
                 return null; // No Action can be found.
             }
 
-            // Debug.Log("Target is reached." + targetPoint);
-
             // Backtracking to get Action.
             string backString = targetPoint;
             AIAction nextAction = null;
@@ -338,7 +332,7 @@ namespace GOAP
                 nextAction = preState[backString].Item2;
                 backString = preState[backString].Item1;
             }
-/*
+            /*
             foreach (string path in debugList)
             {
                 Debug.Log("Reverse plan path: " + path);
