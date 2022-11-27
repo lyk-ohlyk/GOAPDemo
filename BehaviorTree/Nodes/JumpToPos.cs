@@ -57,9 +57,6 @@ public class JumpToPos : Node
         }
 
         m_EnemyController.SetIsJumping(false);
-
-        Debug.Log(string.Format("lastExecutionTime:{0}, Time.time - lastExecutionTime:{1}, delta:{2}", lastExecutionTime, Time.time - lastExecutionTime, timerDelta));
-
         if (Time.time - lastExecutionTime > timerDelta)
         {
             return NodeState.SUCCESS;
@@ -74,7 +71,8 @@ public class JumpToPos : Node
 
         float lerpRate = (Time.time - lastExecutionTime) / timerDelta;
         curPos = Vector3.Lerp(m_StartPos, m_JumpPos, lerpRate);
-        owner.transform.position = new Vector3(curPos.x, 2f * Mathf.Sin(lerpRate * Mathf.PI), curPos.z);
+        owner.transform.position = new Vector3(curPos.x, curPos.y + 2f * Mathf.Sin(lerpRate * Mathf.PI), curPos.z);
+        Debug.Log("owner.transform.position :" + owner.transform.position);
         return NodeState.RUNNING;
     }
 

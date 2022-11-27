@@ -53,7 +53,7 @@ public class NodeMoveTo : Node
             return NodeState.SUCCESS;
         }
 
-        state = NodeState.RUNNING;
+        state = NodeState.SUCCESS;
         return state;
     }
 

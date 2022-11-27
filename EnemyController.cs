@@ -331,6 +331,7 @@ namespace Unity.FPS.AI
         public void StopNavigation(bool stopNavi=true)
         {
             NavMeshAgent.isStopped = stopNavi;
+            NavMeshAgent.updatePosition = !stopNavi;
         }
 
         public void UpdatePathDestination(bool inverseOrder = false)
