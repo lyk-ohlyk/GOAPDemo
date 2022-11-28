@@ -1,6 +1,15 @@
-# GOAPDemo - Design doc(temp)
+# GOAPDemo
 
-## Bot Behaviors
+一个简单的基于GOAP（Goal-Oriented Action Planning）的AI示例。
+
+## 示例视频
+
+https://user-images.githubusercontent.com/18349598/204325962-1f60f5a5-2c4a-4892-ac4b-33fde52ef95f.mp4
+
+https://user-images.githubusercontent.com/18349598/204325972-e3a1fbc5-7b5b-4409-a936-07e61327fb51.mp4
+
+
+## 下面为Demo中的AI行为设计
 
 ### Goal
 
@@ -69,3 +78,5 @@
     IS_TARGET_IN_RANGE
     TARGET_IN_SIGHT
     IS_LOW_HP
+
+
