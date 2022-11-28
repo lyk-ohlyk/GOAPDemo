@@ -38,6 +38,7 @@ namespace BehaviorTree
             jumpNode.lastExecutionTime = 0;
             m_EnemyController = Owner.GetComponent<EnemyController>();
             m_EnemyController.StopNavigation();
+
             jumpNode.SetJumpPos(m_EnemyController.GetJumpPoint());
         }
 

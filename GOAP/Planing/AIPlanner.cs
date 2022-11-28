@@ -21,6 +21,7 @@ namespace GOAP
 
         AIWorldStates m_CurStates;
         AIBlackboard blackboard;
+        public AIGoal DebugCurrentGoal { get; private set; }
 
         TreeManager treeManager;
 
@@ -59,6 +60,7 @@ namespace GOAP
 
                     if (planAction != null)
                     {
+                        DebugCurrentGoal = goal;
                         break;
                     }
                 }
@@ -280,7 +282,7 @@ namespace GOAP
 
                 AIWorldStates curStates = new AIWorldStates(curPoint);
                 List<AIAction> edges = GetAIActions(curStates);
-/*
+                /*
                 foreach (var edge in edges)
                 {
                     Debug.Log("Found edges:" + edge.name);

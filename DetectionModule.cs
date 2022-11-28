@@ -123,10 +123,11 @@ namespace Unity.FPS.AI
             }
 
             float dist = 0f;
+
             if (KnownDetectedTarget != null)
             {
                 dist = Vector3.Distance(transform.position, KnownDetectedTarget.transform.position);
-                if (dist > DetectionRange && LastDetectedTarget != KnownDetectedTarget)
+                if (dist > DetectionRange && LastDetectedTarget == null && m_Health.GetRatio() == 1.0)
                 {
                     KnownDetectedTarget = null;
                 }
@@ -147,7 +148,7 @@ namespace Unity.FPS.AI
 
                 if (IsSeeingTarget)
                 {
-                    planner?.SetCurrentWorldState(StateDef.IS_TARGET_IN_RANGE, dist < 20f);
+                    planner?.SetCurrentWorldState(StateDef.IS_TARGET_IN_RANGE, dist < 15f);
                     planner?.SetCurrentWorldState(StateDef.IS_TARGET_NEAR, dist < 10f);
                 }
                 else

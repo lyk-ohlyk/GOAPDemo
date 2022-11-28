@@ -106,7 +106,6 @@ namespace Unity.FPS.AI
         public PatrolPath PatrolPath { get; set; }
         public JumpPoints JumpPoints{ get; set; }
         private bool m_IsJumping = false;
-        private bool m_IsJumpFinished = false;
         public GameObject KnownDetectedTarget => DetectionModule.KnownDetectedTarget;
         public bool IsTargetInAttackRange => DetectionModule.IsTargetInAttackRange;
         public bool IsSeeingTarget => DetectionModule.IsSeeingTarget;

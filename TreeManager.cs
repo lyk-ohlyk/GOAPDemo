@@ -7,7 +7,7 @@ public class TreeManager : MonoBehaviour
 // The behaviour tree runner which manages all trees' execution.
 {
     [SerializeField]
-    private string CurrentTreeName;
+    public string CurrentTreeName { get; private set; }
 
     public int CurrentTreeIndex;
 
