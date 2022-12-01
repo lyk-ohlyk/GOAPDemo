@@ -1,8 +1,6 @@
 # GOAPDemo - Design doc(temp)
 
-## Bot Behaviors
-
-### Goal
+## Goals
 
     Self-protection, 
         Current State: IS_LOW_HP - 1, IS_TARGET_NEAR - 1
@@ -17,7 +15,7 @@
         Current State: HAS_TARGET – 0
         Target State: HAS_TARGET - 1
 
-## Action
+## Actions
 
 ### Move to target
 

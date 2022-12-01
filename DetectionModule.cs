@@ -122,8 +122,12 @@ namespace Unity.FPS.AI
                 }
             }
 
-            float dist = 0f;
+            if (m_Health == null)
+                m_Health = gameObject.GetComponentInParent<Health>();
+            if (m_Health != null)
+                planner?.SetCurrentWorldState(StateDef.IS_LOW_HP, m_Health.GetRatio() < 0.3);
 
+            float dist = 0f;
             if (KnownDetectedTarget != null)
             {
                 dist = Vector3.Distance(transform.position, KnownDetectedTarget.transform.position);
@@ -133,11 +137,6 @@ namespace Unity.FPS.AI
                 }
             }
             LastDetectedTarget = KnownDetectedTarget;
-
-            if (m_Health == null)
-                m_Health = gameObject.GetComponentInParent<Health>();
-            if (m_Health != null)
-                planner?.SetCurrentWorldState(StateDef.IS_LOW_HP, m_Health.GetRatio() < 0.3);
 
             if (KnownDetectedTarget != null)
             {
